@@ -655,16 +655,30 @@ All 13 explicitly linked documents:
 
 ---
 
-## 13. Build Strategy — Quality Cycle
+## 13. Build Strategy
 
-Derived from a prior build (genomforandemotorn-2) where calibration/enhancement debt accumulated until a single sprint number expanded to 26 sub-sprints. The following rules are mandatory for this project and must be reflected in the implementation plan.
+Derived from a prior build (genomforandemotorn-2) where debt accumulated until a single sprint number expanded to 26 sub-sprints. The following rules are mandatory for this project and must be reflected in the implementation plan.
 
-### 13.1 The Quality Cycle
-
-The build rhythm alternates between a **build phase** (feature sprints) and a **quality cycle**. The quality cycle consists of three phases in sequence:
+### 13.1 The Three-Level Structure
 
 ```
-BUILD PHASE  (2–3 feature sprints)
+VERSION LOOP          — series of sprints leading to a milestone
+  └─ SPRINT           — individual feature sprint
+  └─ QUALITY GATE     — Review → Clear → Verify (every 2–3 sprints)
+  └─ VERSION GATE     — milestone validation (closes the version loop)
+```
+
+Each level prevents a different category of failure:
+- Sprint: task execution
+- Quality gate: feature-level debt and integration issues
+- Version gate: product-level misalignment, milestone validation
+
+### 13.2 The Quality Gate
+
+Every series of feature sprints ends with a quality gate. The gate has three phases:
+
+```
+FEATURE SPRINTS  (2–3 sprints)
      ↓
 REVIEW       — test all flows, generate findings list
      ↓
@@ -672,37 +686,53 @@ CLEAR        — fix all findings from Review only
      ↓
 VERIFY       — re-run test script on affected areas; confirm zero findings
      ↓
-BUILD PHASE  (resume — only when Verify is clean)
+FEATURE SPRINTS  (resume — only when Verify is clean)
 ```
 
-The three phases together are called the **quality cycle**. The cycle may loop (Clear → Verify → Clear → Verify…) until Verify is clean. There is no exit from the cycle with open findings.
+The gate may loop (Clear → Verify → Clear → Verify…) until Verify is clean. There is no exit with open findings.
 
-### 13.2 Cadence Rules
+### 13.3 Quality Gate Cadence Rules
 
 | Rule | Statement |
 |---|---|
-| **Soft rule** | Quality cycle after every 2 feature sprints (every 3rd sprint is a Review) |
-| **Hard rule** | Never more than 3 consecutive feature sprints without a quality cycle |
-| **Enforcement** | Before planning any feature sprint, count feature sprints since last Verify closed. If count ≥ 3 → insert Review sprint first, do not plan the feature sprint |
+| **Soft rule** | Quality gate after every 2 feature sprints |
+| **Hard rule** | Never more than 3 consecutive feature sprints without a quality gate |
+| **Scope boundary** | Clear sprints fix only what Review found — no additions |
+| **Exit gate** | Verify must return zero findings |
+| **Loop limit** | Maximum 3 loops per quality gate; escalate to Thomas if 3rd Verify fails |
 
-### 13.3 Scope Boundary
+### 13.4 The Version Loop
 
-Clear sprints fix **only what Review found**. No new features. No backlog items. No "while we're in here" additions. Anything not surfaced by Review is deferred to the next build phase. Violating this rule is how debt compounds.
+A version loop is a planned series of feature sprints and quality gates that leads to a milestone. Every version loop ends with a quality gate followed by a Version Gate sprint.
 
-### 13.4 Exit Gate
+```
+VERSION LOOP N
+  ├─ Version Loop Planning (interview + plan + Thomas approval)
+  ├─ Feature sprints + quality gates (repeating)
+  ├─ Final quality gate (clears all debt before milestone validation)
+  └─ Version Gate sprint (milestone judgment)
+       ├─ Clean → gate closes → Version Next begins
+       ├─ Gaps → extend loop or re-scope (Thomas decides)
+       └─ Fundamental failure → stop, diagnose with Thomas
+```
 
-**Verify must return zero findings before the quality cycle closes.** There is no "mostly done" exit. If Verify finds issues, the cycle loops back to Clear.
+### 13.5 Milestone Horizon (Rolling Wave)
 
-### 13.5 Loop Limit
+| Horizon | Detail level |
+|---|---|
+| Current version loop | Full sprint-by-sprint plan |
+| Next 2–3 milestones | Vision statements only — goals, no sprint detail |
+| Beyond that | Unknown — count and content not defined |
 
-Maximum **3 loops** (Review → Clear → Verify × 3) per quality cycle. If 3 loops complete without a clean Verify: stop, do not run a 4th loop. Diagnose root cause with Thomas — either Review was incomplete, or the build phase was too long. Resolve before continuing.
+After each Version Gate, planning re-enters for the next version loop only.
 
-### 13.6 Sprint Naming
+### 13.6 Sprint Naming Convention
 
-Sprint names drive automatic detection in the sprint-next skill:
-- `Review` in the name → Review sprint path
-- `Clear` in the name → Clear sprint path (scope-bounded fix sprint)
-- `Verify` in the name → Verify sprint path
+Sprint names drive automatic detection in the skill system:
+- `Review` in name → quality gate Review path
+- `Clear` in name → quality gate Clear path (scope-bounded)
+- `Verify` in name → quality gate Verify path
+- `Version Gate` in name → version gate path
 
 ---
 
