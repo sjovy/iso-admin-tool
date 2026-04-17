@@ -1,6 +1,6 @@
 # Tech Stack
 **Project:** ISO Admin Tool
-**Version:** 1.0 — Sprint 0
+**Version:** 1.1 — Sprint 1
 **Last updated:** 2026-04-17
 
 This document captures what is in use and what agents must know to work safely. For the *why* behind each choice, see `docs/DECISIONS.md`.
@@ -13,7 +13,7 @@ This document captures what is in use and what agents must know to work safely. 
 | Item | Value |
 |------|-------|
 | Framework | Next.js — App Router |
-| Version target | Latest stable at Sprint 1 scaffold time |
+| Version target | **16.2.4** (pinned at Sprint 1 scaffold — 2026-04-17) |
 | Rendering | Server Components by default; Client Components only where interactivity requires it (drag-and-drop, modals) |
 | **Agent constraint** | Use App Router conventions throughout — no `pages/` directory. Server Actions for mutations. |
 
@@ -39,8 +39,8 @@ This document captures what is in use and what agents must know to work safely. 
 ### Styling and UI Components
 | Item | Value |
 |------|-------|
-| CSS framework | Tailwind CSS — latest stable at scaffold time |
-| Component library | shadcn/ui |
+| CSS framework | Tailwind CSS **4.2.2** (pinned at Sprint 1 scaffold) |
+| Component library | shadcn/ui **4.3.0** (CLI version), style: new-york, baseColor: slate |
 | shadcn install command | `pnpm dlx shadcn@latest add <component>` |
 | **Agent constraint** | Do not install shadcn components via npm or yarn. Do not hand-roll components that shadcn provides. |
 | **Gotcha** | shadcn writes to `components/ui/` — do not edit generated files directly; re-run the CLI to update. |
@@ -61,9 +61,9 @@ This document captures what is in use and what agents must know to work safely. 
 ### ORM
 | Item | Value |
 |------|-------|
-| ORM | Prisma |
+| ORM | Prisma **7.7.0** (pinned at Sprint 1 scaffold) |
 | Style | Schema-first |
-| Migration workflow | `prisma migrate dev` (local) → apply via Supabase MCP + CLI (remote) |
+| Migration workflow | Applied via Supabase MCP `apply_migration` (Prisma 7 — `migrate dev` requires direct DB access; MCP used instead) |
 | **Agent constraint** | Schema changes go through Prisma. Never alter Supabase tables directly via SQL console except in emergencies — document any exception. |
 | **Gotcha** | Prisma's connection string must use the Supabase pooled connection URL for serverless (Vercel). Direct URL is for migrations only. Set both `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) in `.env.local`. |
 
@@ -75,7 +75,7 @@ This document captures what is in use and what agents must know to work safely. 
 | Auth provider | Supabase Auth |
 | V1 method | Email / password |
 | Phase 2 method | Microsoft SSO (planned V3) |
-| Session management | Supabase Auth helpers for Next.js (`@supabase/ssr`) |
+| Session management | `@supabase/ssr` **0.10.2** + `@supabase/supabase-js` **2.103.3** (pinned at Sprint 1) |
 | Route protection | Next.js middleware reading Supabase session |
 | **Agent constraint** | Use `@supabase/ssr` — not the deprecated `@supabase/auth-helpers-nextjs`. The APIs differ. |
 | **Gotcha** | Middleware must refresh the session on every request to prevent stale JWT issues. Use the pattern from Supabase's official Next.js App Router guide. |
