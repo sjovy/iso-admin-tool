@@ -33,26 +33,18 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Redirect unauthenticated users away from protected routes
-  if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
+  // Redirect unauthenticated users away from protected routes.
+  // Role-based authorization (e.g. /admin requires consultant) is handled
+  // in the route layout, which runs in the Node.js runtime.
+  if (
+    !user &&
+    (pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/admin") ||
+      pathname.match(/^\/[^/]+\//))
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
-  }
-
-  // Redirect non-consultant authenticated users away from /admin
-  if (user && pathname.startsWith("/admin")) {
-    const { data: appUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (!appUser || appUser.role !== "consultant") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
-    }
   }
 
   // Redirect authenticated users away from /login
