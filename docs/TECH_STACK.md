@@ -1,0 +1,163 @@
+# Tech Stack
+**Project:** ISO Admin Tool
+**Version:** 1.0 — Sprint 0
+**Last updated:** 2026-04-17
+
+This document captures what is in use and what agents must know to work safely. For the *why* behind each choice, see `docs/DECISIONS.md`.
+
+---
+
+## Layer Reference
+
+### Framework
+| Item | Value |
+|------|-------|
+| Framework | Next.js — App Router |
+| Version target | Latest stable at Sprint 1 scaffold time |
+| Rendering | Server Components by default; Client Components only where interactivity requires it (drag-and-drop, modals) |
+| **Agent constraint** | Use App Router conventions throughout — no `pages/` directory. Server Actions for mutations. |
+
+---
+
+### Language
+| Item | Value |
+|------|-------|
+| Language | TypeScript |
+| Mode | Strict (`"strict": true` in tsconfig) |
+| **Agent constraint** | `tsc --noEmit` must pass at every quality gate. No `any` casts without a comment explaining why. |
+
+---
+
+### Package Manager
+| Item | Value |
+|------|-------|
+| Package manager | pnpm |
+| **Agent constraint** | Never use `npm install` or `yarn`. All dependency commands use `pnpm`. Lockfile is `pnpm-lock.yaml`. |
+
+---
+
+### Styling and UI Components
+| Item | Value |
+|------|-------|
+| CSS framework | Tailwind CSS — latest stable at scaffold time |
+| Component library | shadcn/ui |
+| shadcn install command | `pnpm dlx shadcn@latest add <component>` |
+| **Agent constraint** | Do not install shadcn components via npm or yarn. Do not hand-roll components that shadcn provides. |
+| **Gotcha** | shadcn writes to `components/ui/` — do not edit generated files directly; re-run the CLI to update. |
+
+---
+
+### Database
+| Item | Value |
+|------|-------|
+| Database | Supabase (PostgreSQL) |
+| Region | eu-north-1 — Stockholm |
+| Status | Provisioned and confirmed by Thomas |
+| **Agent constraint** | Region is non-negotiable (GDPR). Never create or migrate to a project outside eu-north-1. |
+| **Agent constraint** | Supabase MCP + CLI for all migrations. Do not write raw SQL migrations by hand outside Prisma migration output. |
+
+---
+
+### ORM
+| Item | Value |
+|------|-------|
+| ORM | Prisma |
+| Style | Schema-first |
+| Migration workflow | `prisma migrate dev` (local) → apply via Supabase MCP + CLI (remote) |
+| **Agent constraint** | Schema changes go through Prisma. Never alter Supabase tables directly via SQL console except in emergencies — document any exception. |
+| **Gotcha** | Prisma's connection string must use the Supabase pooled connection URL for serverless (Vercel). Direct URL is for migrations only. Set both `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) in `.env.local`. |
+
+---
+
+### Authentication
+| Item | Value |
+|------|-------|
+| Auth provider | Supabase Auth |
+| V1 method | Email / password |
+| Phase 2 method | Microsoft SSO (planned V3) |
+| Session management | Supabase Auth helpers for Next.js (`@supabase/ssr`) |
+| Route protection | Next.js middleware reading Supabase session |
+| **Agent constraint** | Use `@supabase/ssr` — not the deprecated `@supabase/auth-helpers-nextjs`. The APIs differ. |
+| **Gotcha** | Middleware must refresh the session on every request to prevent stale JWT issues. Use the pattern from Supabase's official Next.js App Router guide. |
+
+---
+
+### Row-Level Security (RLS)
+| Item | Value |
+|------|-------|
+| Enforcement | Supabase RLS policies on every table that holds tenant data |
+| Isolation model | `tenant_id` column on all tenant-scoped tables; RLS reads `auth.uid()` → `user.tenant_id` |
+| Consultant bypass | Service role key used server-side for consultant super-admin operations; never exposed to client |
+| **Agent constraint** | Every new table with tenant data must have RLS enabled and a corresponding `tenant_id` policy before the sprint exits. Never disable RLS on a tenant-scoped table. |
+| **Agent constraint** | The service role key (`SUPABASE_SERVICE_ROLE_KEY`) must never appear in client-side code or be committed to source. |
+
+---
+
+### Hosting and Deployment
+| Item | Value |
+|------|-------|
+| Hosting | Vercel |
+| Status | Project created, GitHub repo connected — confirmed by Thomas |
+| Deployment trigger | Push to `main` → production; push to feature branch → preview |
+| CLI tool | Vercel CLI (`pnpm dlx vercel`) |
+| **Agent constraint** | All deployments go through Vercel. Do not configure alternative hosting. |
+| **Agent constraint** | Environment variables are managed via Vercel dashboard or `vercel env` CLI — never committed to source. |
+
+---
+
+### Version Control
+| Item | Value |
+|------|-------|
+| VCS | GitHub |
+| Status | Repo exists and linked to Vercel |
+| Branch model | `main` is production. Feature work on `sprint-N-description` branches. |
+
+---
+
+### AI Integration
+| Item | Value |
+|------|-------|
+| API | Anthropic Claude API |
+| V1 key management | Platform-level key — stored as `ANTHROPIC_API_KEY` environment variable |
+| V2 key management | Per-tenant keys (clients supply own key) — not V1 scope |
+| Activation | AI features are deferred to V2; architecture must accommodate the integration point from Sprint 1 |
+| **Agent constraint** | Do not activate AI features in V1 sprints. Do design the AI call layer as a named module so V2 can enable it without structural changes. |
+
+---
+
+### CI / Quality Gates
+| Item | Value |
+|------|-------|
+| Type check | `tsc --noEmit` — must pass at every quality gate |
+| Lint | ESLint — must pass at every quality gate |
+| Unit tests | Vitest |
+| Manual gates | HITL sessions as specified per sprint |
+| **Agent constraint** | `tsc --noEmit` and ESLint must pass before a sprint is marked complete. Failing builds are not mergeable. |
+
+---
+
+## Environment Variables Reference
+
+All variables go in `.env.local` (never committed). Document every variable here as it is added.
+
+| Variable | Purpose | Required in |
+|----------|---------|-------------|
+| `DATABASE_URL` | Supabase pooled connection (Prisma runtime) | All environments |
+| `DIRECT_URL` | Supabase direct connection (Prisma migrations) | Local dev, CI |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (client-safe) | All environments |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (client-safe) | All environments |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key — server-only, never client | Server only |
+| `ANTHROPIC_API_KEY` | Claude API key — platform-level for V1 | Server only (V2+) |
+
+---
+
+## Non-Negotiables
+
+1. TypeScript strict mode — always on
+2. pnpm — no other package manager
+3. `tsc --noEmit` must pass before merging
+4. Supabase region = eu-north-1 (Stockholm) — GDPR, cannot change
+5. RLS enabled on every tenant-scoped table — no exceptions
+6. Service role key and API keys never in client code, never committed
+7. App Router only — no `pages/` directory
+8. Migrations through Prisma + Supabase CLI — no ad-hoc SQL console changes
