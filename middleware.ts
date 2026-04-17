@@ -1,71 +1,51 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+// Decode JWT payload without verifying signature — sufficient for routing decisions.
+// Full cryptographic verification happens in Server Components via supabase.auth.getUser().
+function decodeJWTPayload(token: string): { exp?: number } | null {
+  try {
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(base64));
+  } catch {
+    return null;
+  }
+}
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
+function isAuthenticated(request: NextRequest): boolean {
+  // @supabase/ssr stores the session in sb-[projectRef]-auth-token (may be chunked as .0, .1, ...)
+  const authCookie = request.cookies
+    .getAll()
+    .find((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
 
-  // IMPORTANT: Always call getUser() to refresh the session JWT.
-  // Do not use getSession() here — it relies on the cookie without server validation.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!authCookie) return false;
 
+  const payload = decodeJWTPayload(authCookie.value);
+  if (!payload?.exp) return false;
+
+  return payload.exp > Math.floor(Date.now() / 1000);
+}
+
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const authed = isAuthenticated(request);
 
-  // Redirect unauthenticated users away from protected routes.
-  // Role-based authorization (e.g. /admin requires consultant) is handled
-  // in the route layout, which runs in the Node.js runtime.
-  if (
-    !user &&
-    (pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/admin") ||
-      pathname.match(/^\/[^/]+\//))
-  ) {
+  if (!authed && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from /login
-  if (user && pathname === "/login") {
+  if (authed && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  return supabaseResponse;
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths EXCEPT:
-     * - _next/static (static files)
-     * - _next/image (image optimisation)
-     * - favicon.ico, sitemap.xml, robots.txt
-     * - public directory assets
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
