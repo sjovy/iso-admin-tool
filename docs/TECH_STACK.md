@@ -76,9 +76,9 @@ This document captures what is in use and what agents must know to work safely. 
 | V1 method | Email / password |
 | Phase 2 method | Microsoft SSO (planned V3) |
 | Session management | `@supabase/ssr` **0.10.2** + `@supabase/supabase-js` **2.103.3** (pinned at Sprint 1) |
-| Route protection | Next.js middleware reading Supabase session |
+| Route protection | Server Component layouts (middleware temporarily removed — see constraint below) |
 | **Agent constraint** | Use `@supabase/ssr` — not the deprecated `@supabase/auth-helpers-nextjs`. The APIs differ. |
-| **Gotcha** | Middleware must refresh the session on every request to prevent stale JWT issues. Use the pattern from Supabase's official Next.js App Router guide. |
+| **CRITICAL constraint** | Next.js 16 Turbopack bundles `@supabase/ssr` → `ws` → `__dirname` into Edge middleware, crashing every request. Do NOT add `middleware.ts` that imports `@supabase/ssr` or any package with a Node.js-only transitive dependency. Middleware must use dependency-free JWT cookie decode (`atob` only) until Next.js ships the Node.js `proxy.ts` convention. |
 
 ---
 
