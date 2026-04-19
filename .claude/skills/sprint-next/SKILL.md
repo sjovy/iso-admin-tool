@@ -88,7 +88,7 @@ Worker instructions must include:
 - Write or update Playwright `.spec.ts` for each feature behavior built this sprint (per tdd skill Step 5)
 - Report to PMO: tasks completed, token actuals, gate results, git status output, concerns
 - Then STOP — do not commit, push, or modify docs outside sprint scope
-- Never write `CLAUDE.md` or `README.md` to the project root under any circumstances
+- Never write `CLAUDE.md`, `README.md`, or `AGENTS.md` to the project root under any circumstances
 
 ### Step 7: Closure — yours alone
 

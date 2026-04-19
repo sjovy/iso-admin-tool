@@ -7,7 +7,7 @@ description: PMO guide for Sprint 0 — new project initiation. Interview → Pl
 
 Interview → Plan → Docs → Commit → STOP.
 
-Six documents. No code. Never create `README.md` or `CLAUDE.md` in the project root — these are not sprint-zero outputs.
+Six documents. No code. Never create `README.md`, `CLAUDE.md`, or `AGENTS.md` in the project root — these are not sprint-zero outputs.
 
 ---
 

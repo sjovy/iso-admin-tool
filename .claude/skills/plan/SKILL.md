@@ -31,7 +31,7 @@ Each sprint entry must include:
 - Quality gates (tsc, ESLint, vitest, manual)
 - Token budget
 
-**Sprint 1 is always tech stack scaffolding** — framework, auth, DB, deployment, base routing, smoke test. Exit criteria must include: runs from fresh clone, deploys to hosting, auth works end-to-end, tsc and ESLint pass.
+**Sprint 1 is always tech stack scaffolding** — framework, auth, DB, deployment, base routing, smoke test. Exit criteria must include: runs from fresh clone, deploys to hosting, auth works end-to-end, tsc and ESLint pass, pre-commit gate hook passes cleanly on a test commit.
 
 **Quality gate cadence:** embed a Review sprint after every 2 feature sprints; hard maximum 3. Pre-plan Review sprints only — Clear and Verify are generated dynamically from findings.
 
@@ -85,6 +85,12 @@ Job: group findings into tasks, estimate token cost per task, order by dependenc
 Total budget must not exceed 180K. If it does, flag which items to split — do not silently exceed.
 
 **Return:** path written, budget total, any split recommendations.
+
+---
+
+## Constraints
+
+**Never write or schedule tasks that create `CLAUDE.md`, `README.md`, or `AGENTS.md` in the project root.** These files are managed by the PMO system and Thomas, not by planning or worker sub-agents.
 
 ---
 
