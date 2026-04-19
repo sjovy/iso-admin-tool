@@ -3,7 +3,15 @@
 # Silently passes if vitest is not yet configured (pre-Sprint 1).
 
 # Extract file path from hook stdin
-file_path=$(jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
+file_path=$(python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    ti = d.get('tool_input', {})
+    print(ti.get('file_path') or ti.get('path') or '')
+except:
+    pass
+" 2>/dev/null)
 
 # Exit silently if no file path found
 if [ -z "$file_path" ]; then
@@ -17,7 +25,7 @@ if [[ "$file_path" != *.test.ts && "$file_path" != *.spec.ts && \
 fi
 
 # Guard: skip if vitest is not configured
-if ! jq -e '.scripts.test' package.json > /dev/null 2>&1; then
+if ! python3 -c "import json,sys; d=json.load(open('package.json')); sys.exit(0 if 'test' in d.get('scripts',{}) else 1)" 2>/dev/null; then
   exit 0
 fi
 

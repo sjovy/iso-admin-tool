@@ -8,4 +8,8 @@ fi
 
 content=$(head -30 docs/PROJECT_STATUS.md)
 
-jq -Rs '{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "Current project status:\n" + .}}' <<< "$content"
+python3 -c "
+import sys, json
+text = sys.stdin.read()
+print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': 'Current project status:\n' + text}}))
+" <<< "$content"

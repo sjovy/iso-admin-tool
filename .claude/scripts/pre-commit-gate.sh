@@ -4,7 +4,7 @@
 # Activated as a Sprint 1 exit criterion once pnpm lint and tsc are wired up.
 
 # Guard: skip if package.json has no lint script (toolchain not yet set up)
-if ! jq -e '.scripts.lint' package.json > /dev/null 2>&1; then
+if ! python3 -c "import json,sys; d=json.load(open('package.json')); sys.exit(0 if 'lint' in d.get('scripts',{}) else 1)" 2>/dev/null; then
   exit 0
 fi
 
