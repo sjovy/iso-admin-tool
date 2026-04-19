@@ -85,6 +85,16 @@ After all tests pass, look for candidates (see `references/refactoring.md`):
 
 **Never refactor while RED. Get to GREEN first.**
 
+### 5. Playwright Spec
+
+After vitest tests pass and refactor is complete, write or update the Playwright `.spec.ts` file for this feature.
+
+The spec covers the same behavior at the UI level — what a user does, what they observe. It is not a unit test duplicate; it exercises the full stack through the browser.
+
+One spec file per feature. Add new `test()` blocks for each behavior added this cycle. Do not delete existing blocks.
+
+Run `npx playwright test [feature].spec.ts` to confirm the spec passes before marking the behavior complete.
+
 ---
 
 ## Checklist Per Cycle
@@ -95,4 +105,6 @@ After all tests pass, look for candidates (see `references/refactoring.md`):
 [ ] Test would survive internal refactor
 [ ] Code is minimal for this test
 [ ] No speculative features added
+[ ] Playwright spec written or updated for this behavior
+[ ] Playwright spec passes
 ```

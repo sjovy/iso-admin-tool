@@ -25,7 +25,9 @@ Identify: what was the milestone vision? What was built across this version loop
 
 ### Step 2: Automated Gates
 
-Spawn `general-purpose` sub-agent with the Automated Gates Sub-Agent Prompt from `quality-gate/SKILL.md`. Wait for pass before proceeding.
+Spawn `general-purpose` sub-agent with the Automated Gates Sub-Agent Prompt from `quality-gate/skill.md`. Wait for pass before proceeding.
+
+Additionally, run the full Playwright CLI regression suite: `npx playwright test`. This covers all `.spec.ts` files accumulated across the version loop — system-wide regression confidence before milestone judgment. Any failure is a hard gate.
 
 ### Step 3: System-Wide Manual Assessment
 
@@ -81,7 +83,8 @@ Work with Thomas to diagnose root cause. This may require revising the milestone
 
 ```
 Preceded by quality gate?         → Yes, always — hard rule
-Automated gates pass?             → System-wide manual assessment
+Automated gates pass?             → Also run: npx playwright test (full .spec.ts suite) — hard gate
+Playwright CLI fails?             → Hard gate — fix before proceeding to manual assessment
 Thomas confirms milestone?        → Path 1: clean → close → spawn git → await version-next signal
 Significant gaps?                 → Path 2: extend loop or re-scope (Thomas decides) → capture in DECISIONS.md
 Fundamental failure?              → Path 3: stop, diagnose with Thomas

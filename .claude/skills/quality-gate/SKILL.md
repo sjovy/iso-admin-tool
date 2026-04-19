@@ -106,6 +106,8 @@ Live Clear Draft already has task stubs from Step 7. Finalise — do not rebuild
 
 Spawn `general-purpose` sub-agent with `plan` skill (Mode D) to convert Live Clear Draft into proper `SPRINT_PLAN.md`.
 
+After the plan sub-agent returns: spawn a judge sub-agent (`general-purpose`, no skill). Provide the full Findings Log and instruct: "You did not build this codebase. Review each finding independently. Score severity (critical/major/minor), identify root cause category, and recommend fix approach. Do not defer to the builder's framing." Incorporate judge scores into the Clear sprint plan priorities.
+
 ### Step 9: Closure
 
 1. If Review found nothing → skip Clear entirely, insert Verify sprint directly
@@ -190,7 +192,8 @@ AUTOMATED PHASE:
    Use template: .claude/skills/sprint-next/references/task-template.md
 2. Run: tsc --noEmit, ESLint, vitest
    Fix-verify loop until all pass. Do not proceed with failing gates.
-3. Report to PMO: gate results, token actuals. Then STOP.
+3. If sprint number ≥ 2: invoke smoke-test skill. Hard gate — if any scenario fails, report to PMO and stop. Do not proceed to step 4.
+4. Report to PMO: gate results, smoke-test results, token actuals. Then STOP.
    No code fixes beyond automated gates — PMO handles all findings and session management.
 ```
 
@@ -202,6 +205,10 @@ AUTOMATED PHASE:
 Sprint name contains "Review"?         → Your Steps — Review Sprint
 Sprint name contains "Clear"?          → sprint-next Regular Steps + scope boundary (Review findings only)
 Sprint name contains "Verify"?         → Your Steps — Verify Sprint
+
+Automated gates (sprint ≥ 2):         → invoke smoke-test skill after tsc/ESLint/vitest
+Smoke test fails?                      → Hard gate — stop, report to PMO, no manual session
+Step 8 after plan sub-agent returns:   → spawn judge sub-agent (no skill) on Findings Log → incorporate scores into Clear plan
 
 Review resume check:
 SPRINT_PLAN.md IN PROGRESS?            → Resume Path: confirm state → continue from first pending area

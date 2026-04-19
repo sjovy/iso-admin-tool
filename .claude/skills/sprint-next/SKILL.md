@@ -85,12 +85,16 @@ Worker instructions must include:
 - Execute only tasks in assigned track scope, in order defined in `SPRINT_PLAN.md`
 - Track token usage per task
 - Run automated gates (tsc, ESLint, vitest) — fix-verify loop until all pass
+- Write or update Playwright `.spec.ts` for each feature behavior built this sprint (per tdd skill Step 5)
 - Report to PMO: tasks completed, token actuals, gate results, git status output, concerns
 - Then STOP — do not commit, push, or modify docs outside sprint scope
+- Never write `CLAUDE.md` or `README.md` to the project root under any circumstances
 
 ### Step 7: Closure — yours alone
 
 After all sub-agents report complete:
+If sprint number ≥ 2: spawn a judge sub-agent (`general-purpose`, no skill). Provide: worker output summaries, `SPRINT_PLAN.md` task list, list of files changed. Instruct: "You did not build this. Review the implementation against the sprint plan. Identify: missing behaviors, spec deviations, code quality concerns. Score each concern: critical/major/minor." Incorporate judge findings into the LEARNINGS.md entry and flag any critical concerns to Thomas before closing.
+
 1. Update `docs/PROJECT_STATUS.md`: mark sprint closed, set next pending, replace "Last completed sprint" (2–3 lines, do not accumulate history)
 2. Fill `SPRINT_PLAN.md` actuals from sub-agent summaries, set Status `CLOSED`
 3. Append entry to `docs/LEARNINGS.md` — format: `sprint-zero/references/planning-docs-structure.md`. "Carry forward to planner" field is most important — make it specific and actionable.
