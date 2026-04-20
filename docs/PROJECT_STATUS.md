@@ -6,31 +6,36 @@
 
 ## Active Sprint
 
-**Sprint 1 — Tech Stack Scaffolding** — READY FOR T09
-T01–T08 complete and committed. Vercel 404 blocker resolved (added `vercel.json` with `"framework": "nextjs"` — production URL now returns HTTP 200). Auth guards added to `dashboard/layout.tsx` and `[tenantSlug]/layout.tsx` (required for T09 logout step). T09 smoke test ready to run — awaiting Thomas.
+None. Sprint 1 closed. Awaiting Sprint 2 planning.
 
 ---
 
 ## Last Completed Sprint
 
-**Sprint 0 — Planning & Documentation**
-Goal achieved: PRD, Implementation Plan, and all Sprint 0 docs written and approved.
-Key outcome: V1 sprint plan agreed; Supabase (Stockholm), Vercel, and GitHub already provisioned and connected.
-Learning: Seed data (Datadelen sample client) pre-approved for distribution — no approval gate needed at tenant creation.
+**Sprint 1 — Tech Stack Scaffolding** — COMPLETE
+Goal achieved: running skeleton deployed to production. All T01–T09 tasks complete and smoke-tested by Thomas.
+Key outcomes:
+- Next.js 16.2.4, Supabase Auth, Prisma 7.7, RLS, base routing all wired and deployed
+- Production URL confirmed HTTP 200 (iso-admin-tool.vercel.app)
+- Auth flow confirmed end-to-end: login → dashboard → tenant shell → admin guard → logout guard
+- RLS isolation confirmed: Vitest tests pass (Tenant A cannot read Tenant B data)
+
+Learnings:
+- Vercel project must have `"framework": "nextjs"` in `vercel.json` — without it, framework is null and routing returns 404
+- Next.js 16 Turbopack + `@supabase/ssr` is incompatible with the Edge runtime (ws → __dirname). Middleware deferred; auth guards implemented in Server Component layouts instead
+- Prisma `cuid()` default is application-level only — Supabase Table Editor cannot auto-generate it; use SQL insert or service role client
 
 ---
 
 ## Next Pending Sprint
 
-**Sprint 1 — Tech Stack Scaffolding**
-Goal: Running skeleton — framework, auth, database, deployment pipeline, base routing.
-Entry criteria: Sprint 0 complete (this plan approved by Thomas). ✓ Met.
+**Sprint 2** — not yet planned.
 
 ---
 
 ## Open Blockers
 
-**Middleware missing** — Next.js 16 Turbopack bundles `@supabase/ssr` → `ws` → `__dirname` into the Edge runtime. Middleware currently deleted. Route protection is handled in Server Component layouts (all three protected routes — `/dashboard`, `/[tenantSlug]`, `/admin` — now have auth guards in layout.tsx). Fix for middleware (dependency-free JWT cookie check) deferred to a dedicated session after Sprint 1 closes.
+**Middleware missing** — Next.js 16 Turbopack bundles `@supabase/ssr` → `ws` → `__dirname` into the Edge runtime. Middleware currently deleted. Route protection is handled in Server Component layouts. Fix deferred to a dedicated session — do not address mid-sprint.
 
 ---
 
