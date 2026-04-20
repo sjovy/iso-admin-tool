@@ -16,14 +16,17 @@ if [[ "$file_path" != *"SPRINT_PLAN.md" ]]; then
   exit 0
 fi
 
-# Extract the Total line — matches patterns like "| **Total** | **40K** |" or "| **Total** | 40K |"
+# Extract total from a **Total** summary row — matches "| **Total** | **40K** |" or "| **Total** | 40K |"
 total_k=$(python3 -c "
-import re, sys
+import re
 try:
     content = open('$file_path').read()
-    m = re.search(r'[Tt]otal.*?(\d+)K', content)
-    if m:
-        print(m.group(1))
+    for line in content.splitlines():
+        if re.search(r'\*\*Total\b', line, re.IGNORECASE):
+            nums = re.findall(r'(\d+)K', line)
+            if nums:
+                print(max(int(n) for n in nums))
+                break
 except:
     pass
 " 2>/dev/null)

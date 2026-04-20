@@ -53,7 +53,7 @@ For feature and Clear sprints: write a task breakdown.
 - **Vertical slices (tracer bullet):** each task delivers end-to-end behavior — schema + API + UI + tests in one slice, not separate horizontal layers
 - **Deep modules:** prefer small interfaces hiding complex implementations (see `plan/references/deep-modules.md`)
 - **HITL/AFK:** label tasks requiring Thomas's presence as HITL; autonomous tasks as AFK
-- Token estimates: SIMPLE = 35K, MEDIUM = 70K, COMPLEX = 140K; sprint ceiling = 180K
+- Token estimates: SIMPLE = 35K, MEDIUM = 70K, COMPLEX = 140K, +40K buffer per sprint; feature sprint ceiling = 200K; Clear sprint ceiling = 180K
 
 **Return:** path written, task list with estimates, HITL/AFK summary, open questions.
 
