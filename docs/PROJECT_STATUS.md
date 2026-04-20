@@ -6,7 +6,7 @@
 
 ## Active Sprint
 
-None. Sprint 2-Clear closed. Awaiting Sprint 2-Verify.
+None. Sprint 2-Clear closed. Next: Sprint 3.
 
 ---
 
@@ -23,7 +23,7 @@ Key fixes:
 
 ## Next Pending Sprint
 
-**Sprint 2-Verify** — Kanban Board Defect Verification (automated gates + re-test of 3 fixed areas)
+**Sprint 3 — KPI Register**
 
 ---
 

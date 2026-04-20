@@ -101,30 +101,6 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 
 ---
 
-### Sprint 2-Verify — Kanban Board Defect Verification
-
-**Type:** Verify
-**Goal:** Re-test the 3 areas fixed in Sprint 2-Clear. Zero findings closes the quality gate cycle. Automated gates run first; if any fail, stop before manual re-test.
-**REQ scope:** None — validation only
-**Validates:** Sprint 2-Clear fixes (createTask interactive tx, Worker ownerId guard, moveTask error normalization)
-
-**Test areas:**
-1. `createTask` audit log `entityId` — verify real UUID written, not `'pending'`
-2. Worker `createTask` with mismatched `ownerId` — verify FORBIDDEN returned
-3. `moveTask` not-found vs. Worker-forbidden — verify identical error shape
-
-**Tracks:** None
-
-**Entry criteria:** Sprint 2-Clear closed
-
-**Exit criteria:**
-- Automated gates pass: `tsc --noEmit`, ESLint, vitest (≥70 tests)
-- All 3 fixed areas re-verified — zero findings
-
-**Token budget:** ~20K EST
-
----
-
 ### Sprint 3 — KPI Register
 
 **Type:** Feature
@@ -346,7 +322,6 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 | Sprint | Name | Type | REQ Scope | Budget EST |
 |--------|------|------|-----------|------------|
 | 1 | Tech Stack Scaffolding | Scaffolding | REQ-001, REQ-010, REQ-013 | ~120K |
-| 2-Verify | Kanban Board Defect Verification | Verify | — | ~20K |
 | 3 | KPI Register | Feature | REQ-002, REQ-008 stub | ~135K |
 | 4 | Quality Gate (S2–S3) — Review | Review | — | ~50K+ |
 | 5 | NCR Module and Traceability | Feature | REQ-007, REQ-008 | ~150K |

@@ -129,7 +129,8 @@ Incorporate all findings into the LEARNINGS.md entry regardless of disposition.
 6. Remove sprint entry from `docs/IMPLEMENTATION_PLAN.md`
 7. Spawn `general-purpose` sub-agent with `git` skill → commit and push
 
-**If Clear sprint:** after closure, insert Verify sprint as next pending in `docs/IMPLEMENTATION_PLAN.md` and `PROJECT_STATUS.md`. Do not ask Thomas. Stop.
+**If Clear sprint triggered by a quality-gate Review** (a Review sprint preceded this Clear): insert Verify sprint as next pending in `docs/IMPLEMENTATION_PLAN.md` and `PROJECT_STATUS.md`. Do not ask Thomas. Stop.
+**If Clear sprint triggered by judge findings only** (no preceding Review sprint): stop. Automated gates in the Clear are sufficient — no Verify needed.
 **Otherwise:** stop. Each sprint is a committed checkpoint.
 
 ---
@@ -150,7 +151,8 @@ Context loaded?      → Pre-planning check → "Do you want to pre-approve? (ye
 Pre-approve YES?     → Plan sub-agent → entry criteria → worker sub-agent (one sweep)
 Pre-approve NO?      → Plan sub-agent → present plan → Thomas approves → entry criteria → worker
 Workers done?        → Closure → git sub-agent → stop
-Clear sprint?        → After closure: insert Verify as next pending → stop
+Quality-gate Clear?  → After closure: insert Verify as next pending → stop
+Judge-only Clear?    → After closure: stop — no Verify needed
 Judge critical?  → Correction sprint inserted → flag Thomas → stop
 Judge major?     → PMO judgment: correction sprint OR open blocker in PROJECT_STATUS
 Judge minor?     → LEARNINGS only
