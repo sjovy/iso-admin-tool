@@ -1,13 +1,13 @@
 # Project Status
 **Project:** ISO Admin Tool
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-20
 
 ---
 
 ## Active Sprint
 
-**Sprint 1 — Tech Stack Scaffolding** — BLOCKED
-T01–T08 complete and committed. T09 (smoke test) blocked: app works locally but Vercel returns 404 NOT_FOUND. Root cause undiagnosed — session ended at quota limit before full diagnosis.
+**Sprint 1 — Tech Stack Scaffolding** — READY FOR T09
+T01–T08 complete and committed. Vercel 404 blocker resolved (added `vercel.json` with `"framework": "nextjs"` — production URL now returns HTTP 200). Auth guards added to `dashboard/layout.tsx` and `[tenantSlug]/layout.tsx` (required for T09 logout step). T09 smoke test ready to run — awaiting Thomas.
 
 ---
 
@@ -30,9 +30,7 @@ Entry criteria: Sprint 0 complete (this plan approved by Thomas). ✓ Met.
 
 ## Open Blockers
 
-**Vercel 404 on production** — app runs correctly locally (`pnpm dev` confirmed working). Vercel returns `NOT_FOUND` from its routing layer, not from Next.js. Suspected trigger: `proxy.ts` experiment confused Vercel framework detection. Diagnosis required before T09 can run.
-
-**Middleware constraint** — Next.js 16 Turbopack bundles `@supabase/ssr` → `ws` → `__dirname` into the Edge runtime, causing `MIDDLEWARE_INVOCATION_FAILED`. Middleware currently deleted. Fix: rewrite middleware with dependency-free JWT cookie check (no external imports). Do in a dedicated session — do not debug mid-sprint.
+**Middleware missing** — Next.js 16 Turbopack bundles `@supabase/ssr` → `ws` → `__dirname` into the Edge runtime. Middleware currently deleted. Route protection is handled in Server Component layouts (all three protected routes — `/dashboard`, `/[tenantSlug]`, `/admin` — now have auth guards in layout.tsx). Fix for middleware (dependency-free JWT cookie check) deferred to a dedicated session after Sprint 1 closes.
 
 ---
 
