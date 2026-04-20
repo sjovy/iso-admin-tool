@@ -66,6 +66,24 @@ Append-only. One entry per completed sprint. Read by the plan sub-agent before e
 - Sprint budget should be stated as "active context budget" not "sum of all tasks" — parallel tracks do not multiply cost.
 - After Sprint 2-Clear closes, Verify sprint must be inserted before Sprint 3 proceeds.
 
+## Sprint 2-Clear — Kanban Board Defect Fixes — 2026-04-20
+
+**Tokens:** ~22K actual of ~40K EST (-45% — single file, targeted fixes, no exploration needed)
+**Over-ran:** None
+**Under-ran:** All tasks — fixes were smaller than budgeted once the file was read and the target was clear
+
+**Surprises / failures:**
+- Judge (MAJOR): New tests for `createTask` audit log and `moveTask` transaction structure use test-local simulations — they manually invoke mocked `tx.task.create` and `tx.auditLog.create` directly rather than importing the real server action. A regression in `tasks.ts` would not be caught. The production code is correct, but the tests provide no regression protection for the actual implementation.
+- Judge (MAJOR): `moveTask` still uses the batch `$transaction([op1, op2])` form. For `moveTask` this is not a bug (the `taskId` is known before the transaction), but it is inconsistent with the interactive pattern now used in `createTask`. Future TECH_STACK.md note added.
+- `updateTask` has no Worker RBAC guard — a Worker can update any field including `ownerId` on any task visible to them. Pre-existing gap, outside this sprint's scope, but flagged.
+- Unowned task design gap: a Worker can create an unowned task (allowed by design), but no Worker can then move it (canMoveTask requires `taskOwnerId === callerId`, null ≠ any string). Pre-existing inconsistency.
+
+**Carry forward to planner:**
+- Sprint 3 and all future sprints: server action unit tests must mock `prisma` and call the real exported function (e.g. `import { createTask } from '@/app/actions/tasks'`). Test-local simulations do not catch regressions in the production code path. Reject tests that do not exercise the real function.
+- `updateTask` needs a Worker RBAC guard (cannot update `ownerId` to another user). Add to Sprint 3 or a dedicated clear pass — do not let it accumulate.
+- Unowned task / Worker move gap: decide if Workers should be blocked from creating unowned tasks, or if `moveTask` should allow Workers to move unowned tasks. Document the decision.
+- Token estimates for Clear sprints targeting a single file should be ~15–25K, not 40K. The budget ceiling of 40K is fine as a safety net but the estimate should be tighter.
+
 <!-- Sprint entries are appended here as sprints complete. -->
 <!-- Format:
 

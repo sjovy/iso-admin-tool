@@ -95,13 +95,27 @@ export async function createTask(
     }
   }
 
+  // RBAC: Worker may only create tasks assigned to themselves
+  const appUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  })
+
+  if (!appUser) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.role === 'worker' && input.ownerId && input.ownerId !== user.id) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Workers may only create tasks assigned to themselves' } }
+  }
+
   // Parse dueDate if provided
   const dueDate = input.dueDate ? new Date(input.dueDate) : null
 
   try {
-    // Atomic transaction: create task + audit log
-    const [createdTask] = await prisma.$transaction([
-      prisma.task.create({
+    // Atomic interactive transaction: create task first to capture real ID, then audit log
+    const createdTask = await prisma.$transaction(async (tx) => {
+      const task = await tx.task.create({
         data: {
           tenantId,
           moduleId: input.moduleId,
@@ -114,13 +128,13 @@ export async function createTask(
           status: input.status,
         },
         include: { owner: { select: { id: true, email: true } } },
-      }),
-      prisma.auditLog.create({
+      })
+      await tx.auditLog.create({
         data: {
           tenantId,
           actorId: user.id,
           entityType: 'task',
-          entityId: 'pending', // Will be updated after creation — see note below
+          entityId: task.id,
           action: 'create',
           payload: {
             title: input.title,
@@ -128,8 +142,9 @@ export async function createTask(
             priority: input.priority,
           },
         },
-      }),
-    ])
+      })
+      return task
+    })
 
     return { success: true, data: mapTaskToView(createdTask) }
   } catch (err) {
@@ -142,11 +157,6 @@ export async function createTask(
  * Move a task to a new status column. Validates the target status is valid for the module variant.
  * Workers may only move tasks they own.
  * Atomic: status update + audit log in one transaction.
- *
- * NOTE: entityId for audit log cannot be set inside $transaction when creating task (the ID
- * isn't known until after the create completes). For createTask, entityId is set to 'pending'
- * as a known limitation — a follow-up can use interactive transactions ($transaction(async fn))
- * to get the created ID first. moveTask and updateTask have the taskId available upfront.
  */
 export async function moveTask(
   tenantSlug: string,
@@ -176,7 +186,7 @@ export async function moveTask(
   })
 
   if (!task || task.tenantId !== tenantId) {
-    return { success: false, error: { code: 'NOT_FOUND', message: `Task '${input.taskId}' not found` } }
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Task not found or access denied' } }
   }
 
   // RBAC: Worker may only move their own tasks
@@ -190,9 +200,10 @@ export async function moveTask(
   }
 
   if (appUser.role === 'worker' && task.ownerId !== user.id) {
+    // Return same shape as not-found to prevent information leakage
     return {
       success: false,
-      error: { code: 'FORBIDDEN', message: 'Workers may only move tasks they own' },
+      error: { code: 'NOT_FOUND', message: 'Task not found or access denied' },
     }
   }
 

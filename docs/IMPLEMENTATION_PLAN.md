@@ -101,32 +101,27 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 
 ---
 
-### Sprint 2-Clear — Kanban Board Defect Fixes
+### Sprint 2-Verify — Kanban Board Defect Verification
 
-**Type:** Clear
-**Goal:** Fix 3 defects found by judge review of Sprint 2. No new features. No additions beyond what the judge flagged.
-**REQ scope:** None — defect resolution only
+**Type:** Verify
+**Goal:** Re-test the 3 areas fixed in Sprint 2-Clear. Zero findings closes the quality gate cycle. Automated gates run first; if any fail, stop before manual re-test.
+**REQ scope:** None — validation only
+**Validates:** Sprint 2-Clear fixes (createTask interactive tx, Worker ownerId guard, moveTask error normalization)
 
-**Fix list:**
+**Test areas:**
+1. `createTask` audit log `entityId` — verify real UUID written, not `'pending'`
+2. Worker `createTask` with mismatched `ownerId` — verify FORBIDDEN returned
+3. `moveTask` not-found vs. Worker-forbidden — verify identical error shape
 
-| # | Score | Fix | File scope |
-|---|-------|-----|------------|
-| 1 | CRITICAL | Refactor `createTask` to use interactive transaction so audit log captures real entity ID (not 'pending') | `src/app/actions/tasks.ts` |
-| 2 | MAJOR | Add Worker role check in `createTask`: reject if `ownerId !== currentUserId` for Worker role | `src/app/actions/tasks.ts` |
-| 3 | MAJOR | Normalize `moveTask` error response: return uniform "not found or forbidden" — do not differentiate permission denied vs. not found | `src/app/actions/tasks.ts` |
+**Tracks:** None
 
-**Tracks:** None (single file, sequential)
-
-**Entry criteria:** Sprint 2 closed
+**Entry criteria:** Sprint 2-Clear closed
 
 **Exit criteria:**
-- `createTask` audit log `entityId` equals the created task's real UUID (verified via test)
-- Worker calling `createTask` with `ownerId` ≠ their own user ID receives `FORBIDDEN`
-- `moveTask` returns the same error shape regardless of whether the task is not found or the caller lacks permission
-- `tsc --noEmit` passes, ESLint passes, vitest passes (all 59+ existing tests still pass)
+- Automated gates pass: `tsc --noEmit`, ESLint, vitest (≥70 tests)
+- All 3 fixed areas re-verified — zero findings
 
-**Quality gates:** `tsc --noEmit`, ESLint, vitest
-**Token budget:** ~40K EST
+**Token budget:** ~20K EST
 
 ---
 
@@ -350,7 +345,7 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 | Sprint | Name | Type | REQ Scope | Budget EST |
 |--------|------|------|-----------|------------|
 | 1 | Tech Stack Scaffolding | Scaffolding | REQ-001, REQ-010, REQ-013 | ~120K |
-| 2-Clear | Kanban Board Defect Fixes | Clear | — | ~40K |
+| 2-Verify | Kanban Board Defect Verification | Verify | — | ~20K |
 | 3 | KPI Register | Feature | REQ-002, REQ-008 stub | ~100K |
 | 4 | Quality Gate (S2–S3) — Review | Review | — | ~50K+ |
 | 5 | NCR Module and Traceability | Feature | REQ-007, REQ-008 | ~150K |

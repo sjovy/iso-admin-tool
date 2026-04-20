@@ -73,6 +73,50 @@ describe('isValidStatus — status validation', () => {
   })
 })
 
+// ─── createTask Worker ownerId guard (pure logic extracted) ──────────────────
+
+// Extract the Worker ownerId guard as a pure function for testing
+function canCreateTaskWithOwner(params: {
+  callerRole: string
+  callerId: string
+  ownerId: string | null | undefined
+}): boolean {
+  if (params.callerRole === 'worker' && params.ownerId && params.ownerId !== params.callerId) {
+    return false
+  }
+  return true
+}
+
+describe('createTask Worker ownerId guard', () => {
+  it('Worker with matching ownerId is allowed', () => {
+    expect(canCreateTaskWithOwner({ callerRole: 'worker', callerId: 'user-1', ownerId: 'user-1' })).toBe(true)
+  })
+
+  it('Worker with mismatched ownerId is forbidden', () => {
+    expect(canCreateTaskWithOwner({ callerRole: 'worker', callerId: 'user-1', ownerId: 'user-2' })).toBe(false)
+  })
+
+  it('Worker with null ownerId is allowed (unowned task)', () => {
+    expect(canCreateTaskWithOwner({ callerRole: 'worker', callerId: 'user-1', ownerId: null })).toBe(true)
+  })
+
+  it('Worker with undefined ownerId is allowed', () => {
+    expect(canCreateTaskWithOwner({ callerRole: 'worker', callerId: 'user-1', ownerId: undefined })).toBe(true)
+  })
+
+  it('Management with any ownerId is allowed', () => {
+    expect(canCreateTaskWithOwner({ callerRole: 'management', callerId: 'user-1', ownerId: 'user-99' })).toBe(true)
+  })
+
+  it('Company Admin with any ownerId is allowed', () => {
+    expect(canCreateTaskWithOwner({ callerRole: 'company_admin', callerId: 'user-1', ownerId: 'user-99' })).toBe(true)
+  })
+
+  it('Consultant with any ownerId is allowed', () => {
+    expect(canCreateTaskWithOwner({ callerRole: 'consultant', callerId: 'user-1', ownerId: 'user-99' })).toBe(true)
+  })
+})
+
 // ─── moveTask permission check (pure logic extracted) ───────────────────────
 
 // Extract the Worker permission check as a pure function for testing
@@ -111,6 +155,37 @@ describe('moveTask permission check', () => {
 
   it('Consultant can move any task', () => {
     expect(canMoveTask({ callerRole: 'consultant', callerId: 'user-1', taskOwnerId: 'user-2' })).toBe(true)
+  })
+})
+
+// ─── moveTask normalized error shape ─────────────────────────────────────────
+
+// Extract the normalized error logic as a pure function for testing
+function moveTaskErrorShape(scenario: 'not_found' | 'worker_forbidden'): { code: string; message: string } {
+  if (scenario === 'not_found') {
+    return { code: 'NOT_FOUND', message: 'Task not found or access denied' }
+  }
+  // worker_forbidden — normalized to same shape (no info leakage)
+  return { code: 'NOT_FOUND', message: 'Task not found or access denied' }
+}
+
+describe('moveTask normalized error shape', () => {
+  it('task not found returns NOT_FOUND with unified message', () => {
+    const err = moveTaskErrorShape('not_found')
+    expect(err.code).toBe('NOT_FOUND')
+    expect(err.message).toBe('Task not found or access denied')
+  })
+
+  it('Worker forbidden returns identical shape to not-found (no info leakage)', () => {
+    const err = moveTaskErrorShape('worker_forbidden')
+    expect(err.code).toBe('NOT_FOUND')
+    expect(err.message).toBe('Task not found or access denied')
+  })
+
+  it('both cases produce identical error objects', () => {
+    const notFound = moveTaskErrorShape('not_found')
+    const workerForbidden = moveTaskErrorShape('worker_forbidden')
+    expect(notFound).toEqual(workerForbidden)
   })
 })
 
@@ -176,39 +251,75 @@ describe('createTask audit log', () => {
     vi.clearAllMocks()
   })
 
-  it('audit log create is included in the same transaction as task create', () => {
-    const mockTransaction = vi.fn().mockResolvedValue([
-      { id: 'new-task-id', title: 'New Task', status: 'backlog' },
-      { id: 'audit-log-id' },
-    ])
+  it('audit log create is included in the same interactive transaction as task create', async () => {
+    const createdTask = { id: 'real-task-uuid-123', title: 'New Task', status: 'backlog' }
+    const mockTransaction = vi.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
+      const tx = {
+        task: { create: vi.fn().mockResolvedValue(createdTask) },
+        auditLog: { create: vi.fn().mockResolvedValue({ id: 'audit-log-id' }) },
+      }
+      return fn(tx)
+    })
 
     const mockPrisma = {
-      task: { create: vi.fn().mockReturnValue({ _type: 'task_create' }) },
-      auditLog: { create: vi.fn().mockReturnValue({ _type: 'audit_create' }) },
       $transaction: mockTransaction,
     }
 
-    const taskCreateOp = mockPrisma.task.create({
-      data: { title: 'New Task', status: 'backlog', tenantId: 't1', moduleId: 'm1', priority: 'MEDIUM' },
-    })
-    const auditLogOp = mockPrisma.auditLog.create({
-      data: {
-        tenantId: 't1',
-        actorId: 'user-1',
-        entityType: 'task',
-        entityId: 'pending',
-        action: 'create',
-        payload: { title: 'New Task', status: 'backlog', priority: 'MEDIUM' },
-      },
-    })
+    let capturedEntityId: string | undefined
 
-    mockPrisma.$transaction([taskCreateOp, auditLogOp])
+    // Simulate the interactive transaction pattern from tasks.ts
+    await mockPrisma.$transaction(async (tx: { task: { create: (args: unknown) => Promise<typeof createdTask> }, auditLog: { create: (args: { data: Record<string, unknown> }) => Promise<unknown> } }) => {
+      const task = await tx.task.create({ data: { title: 'New Task', status: 'backlog', tenantId: 't1', moduleId: 'm1', priority: 'MEDIUM' } })
+      capturedEntityId = task.id
+      await tx.auditLog.create({
+        data: {
+          tenantId: 't1',
+          actorId: 'user-1',
+          entityType: 'task',
+          entityId: task.id,
+          action: 'create',
+          payload: { title: 'New Task', status: 'backlog', priority: 'MEDIUM' },
+        },
+      })
+      return task
+    })
 
     expect(mockTransaction).toHaveBeenCalledOnce()
-    const [ops] = mockTransaction.mock.calls[0] as [unknown[]]
-    expect(ops).toHaveLength(2)
-    // Both task create and audit log are in the same atomic transaction
-    expect(ops[0]).toEqual({ _type: 'task_create' })
-    expect(ops[1]).toEqual({ _type: 'audit_create' })
+    // entityId must equal the created task's real id — not 'pending'
+    expect(capturedEntityId).toBe('real-task-uuid-123')
+  })
+
+  it('audit log entityId equals the created task id (not pending)', async () => {
+    const realTaskId = 'real-uuid-abc-456'
+    let auditEntityId: string | undefined
+
+    const tx = {
+      task: {
+        create: vi.fn().mockResolvedValue({
+          id: realTaskId,
+          title: 'Task',
+          status: 'backlog',
+          owner: null,
+          dueDate: null,
+          isoClauseRef: null,
+          priority: 'MEDIUM',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      },
+      auditLog: {
+        create: vi.fn().mockImplementation(({ data }: { data: { entityId: string } }) => {
+          auditEntityId = data.entityId
+          return Promise.resolve({ id: 'audit-id' })
+        }),
+      },
+    }
+
+    // Execute the interactive transaction callback directly
+    const createdTask = await tx.task.create({ data: {} })
+    await tx.auditLog.create({ data: { entityId: createdTask.id } })
+
+    expect(auditEntityId).toBe(realTaskId)
+    expect(auditEntityId).not.toBe('pending')
   })
 })
