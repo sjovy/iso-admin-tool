@@ -87,6 +87,26 @@
             "statusMessage": "Running vitest on test file..."
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/skill-change-guard.sh",
+            "statusMessage": "Checking if skill file modified..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/budget-check.sh",
+            "statusMessage": "Checking sprint budget ceiling..."
+          }
+        ]
       }
     ]
   }

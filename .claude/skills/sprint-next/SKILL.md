@@ -26,6 +26,24 @@ Count feature sprints since the last Verify closed. If count ≥ 3 → do not pr
 
 ---
 
+## Token Budget Ceiling
+
+> Enforced at Step 3 (plan creation). The `budget-check.sh` hook blocks writes to SPRINT_PLAN.md that exceed the ceiling.
+
+**Hard ceiling: 200K tokens per sprint.** The plan sub-agent must not produce a SPRINT_PLAN.md whose total exceeds this.
+
+**Complexity formula for task estimates:**
+| Complexity | Token EST |
+|------------|-----------|
+| SIMPLE     | 35K       |
+| MEDIUM     | 70K       |
+| COMPLEX    | 140K      |
+| Buffer     | +40K per sprint |
+
+If the plan total exceeds 200K after buffer: re-scope with Thomas before spawning the worker. Split tasks, defer items, or divide into two sprints. Never proceed over 200K.
+
+---
+
 ## Your Steps — Regular Sprint
 
 *Also applies to Clear sprints — with scope boundary: fix only what Review found. No additions.*
@@ -89,11 +107,19 @@ Worker instructions must include:
 - Report to PMO: tasks completed, token actuals, gate results, git status output, concerns
 - Then STOP — do not commit, push, or modify docs outside sprint scope
 - Never write `CLAUDE.md`, `README.md`, or `AGENTS.md` to the project root under any circumstances
+- Tests for server actions and mutation functions must import and call the real exported function. Test-local simulations (manually invoking mocked callbacks without importing the real function) do not catch regressions in production code and are not acceptable.
 
 ### Step 7: Closure — yours alone
 
 After all sub-agents report complete:
-If sprint number ≥ 2: spawn a judge sub-agent (`general-purpose`, no skill). Provide: worker output summaries, `SPRINT_PLAN.md` task list, list of files changed. Instruct: "You did not build this. Review the implementation against the sprint plan. Identify: missing behaviors, spec deviations, code quality concerns. Score each concern: critical/major/minor." Incorporate judge findings into the LEARNINGS.md entry and flag any critical concerns to Thomas before closing.
+If sprint number ≥ 2: spawn a judge sub-agent (`general-purpose`, no skill). Provide: worker output summaries, `SPRINT_PLAN.md` task list, list of files changed. Instruct: "You did not build this. Review the implementation against the sprint plan. Identify: missing behaviors, spec deviations, code quality concerns. Score each concern: critical/major/minor."
+
+**Judge finding disposition:**
+- **Critical** → do not close the sprint. Insert a correction sprint (suffix `-b` for Clear sprints; `-patch` for feature sprints) as next pending in `IMPLEMENTATION_PLAN.md`. Flag to Thomas before proceeding.
+- **Major** → PMO judgment: if the finding is a production correctness or security issue → insert correction sprint. If it is quality debt (test fidelity, inconsistency, missing edge case not in exit criteria) → document as open blocker in `PROJECT_STATUS.md` and carry forward explicitly. Never silently absorb.
+- **Minor** → `LEARNINGS.md` entry only. Carry forward to planner.
+
+Incorporate all findings into the LEARNINGS.md entry regardless of disposition.
 
 1. Update `docs/PROJECT_STATUS.md`: mark sprint closed, set next pending, replace "Last completed sprint" (2–3 lines, do not accumulate history)
 2. Fill `SPRINT_PLAN.md` actuals from sub-agent summaries, set Status `CLOSED`
@@ -125,4 +151,7 @@ Pre-approve YES?     → Plan sub-agent → entry criteria → worker sub-agent 
 Pre-approve NO?      → Plan sub-agent → present plan → Thomas approves → entry criteria → worker
 Workers done?        → Closure → git sub-agent → stop
 Clear sprint?        → After closure: insert Verify as next pending → stop
+Judge critical?  → Correction sprint inserted → flag Thomas → stop
+Judge major?     → PMO judgment: correction sprint OR open blocker in PROJECT_STATUS
+Judge minor?     → LEARNINGS only
 ```

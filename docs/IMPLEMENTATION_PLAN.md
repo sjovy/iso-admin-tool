@@ -143,6 +143,7 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 | ISO 9001 Clause 9.1 category tags on each KPI (conformity / customer satisfaction / QMS performance / risk / supplier / improvement) — coverage indicator on register page | MEDIUM | AFK |
 | Stub traceability field on KPI: "linked corrective action ID" (populated in Sprint 5) | SIMPLE | AFK |
 | Seed 10 sample KPIs from analysis doc for new tenants | SIMPLE | AFK |
+| Add Worker RBAC guard to `updateTask` — Worker cannot update `ownerId` to another user's ID (parity with `createTask` guard; judge finding from Sprint 2-Clear) | SIMPLE | AFK |
 
 **Domain hints:** Data-integrity-sensitive (RAG logic, measurement history immutability). UI-moderate (list and detail, no drag-and-drop). Coverage indicator is a key compliance-evidence feature.
 
@@ -158,7 +159,7 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 - `tsc --noEmit`, ESLint, vitest pass
 
 **Quality gates:** `tsc --noEmit`, ESLint, vitest on RAG computation logic
-**Token budget:** ~100K EST
+**Token budget:** ~135K EST
 
 ---
 
@@ -346,7 +347,7 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 |--------|------|------|-----------|------------|
 | 1 | Tech Stack Scaffolding | Scaffolding | REQ-001, REQ-010, REQ-013 | ~120K |
 | 2-Verify | Kanban Board Defect Verification | Verify | — | ~20K |
-| 3 | KPI Register | Feature | REQ-002, REQ-008 stub | ~100K |
+| 3 | KPI Register | Feature | REQ-002, REQ-008 stub | ~135K |
 | 4 | Quality Gate (S2–S3) — Review | Review | — | ~50K+ |
 | 5 | NCR Module and Traceability | Feature | REQ-007, REQ-008 | ~150K |
 | 6 | Document Linking and Storage Adapter | Feature | REQ-006, REQ-014 | ~100K |

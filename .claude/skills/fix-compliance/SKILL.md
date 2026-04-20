@@ -1,83 +1,61 @@
 ---
 name: fix-compliance
-description: PMO procedure for handling any discrepancy found in methodology or project files. Covers fix, upstream/downstream tracing via dependency-map, template propagation, and commit. Invoke immediately when any discrepancy is detected.
+description: PMO procedure for handling any discrepancy found in methodology or project files. Covers fix, upstream/downstream dependency traversal, and template propagation. Invoke immediately when any inconsistency is found in .claude/ or docs/ files.
 ---
 
-# Fix Compliance — PMO Guide
+# Fix Compliance
 
-Invoke this skill the moment any discrepancy is found — in any `.claude/` file, any `docs/` file, or any agent behaviour. Do not defer, log, or continue other work until this procedure is complete.
+Invoke immediately when any discrepancy is found in `.claude/` or `docs/` files. Do not defer, log, or continue other work first.
 
----
-
-## What Counts as a Discrepancy
-
-- A step missing from a skill that should be there
-- An agent instruction that produces the wrong behaviour
-- A rule that is incomplete, ambiguous, or contradicted by another rule
-- A document that is inconsistent with another document
-- A gap between what the methodology prescribes and what actually happens
-- A self-review checklist that does not catch a known failure mode
-
-## What Does NOT Count
-
-- Improvements, enhancements, or nice-to-haves → normal planning
-- Differences in style or formatting that do not affect behaviour
+**Discrepancy includes:** missing steps, contradictory rules between skills, a skill calling another skill in a way the callee no longer supports, gaps between methodology and reality, self-review checklist failures, inconsistencies introduced by a skill edit.
 
 ---
 
-## Procedure
+## Steps
 
-### Step 1 — Identify
+### Step 1: Identify
 
-State clearly:
-- Which file contains the discrepancy
-- What is wrong (missing step, contradiction, wrong behaviour)
-- What the correct state should be
+State the discrepancy precisely:
+- Which file contains the problem
+- What the rule currently says
+- What it should say
+- What downstream effect the current state causes
 
-### Step 2 — Fix
+### Step 2: Fix
 
-Apply the fix now. Do not proceed until the file is corrected.
+Make the correction in the affected file. Do not fix adjacent issues in the same edit — one discrepancy per fix-compliance run.
 
-### Step 3 — Trace Upstream
+### Step 3: Trace Upstream
 
-Open `.claude/rules/dependency-map.md`. Find the fixed file's row. Check its **Upstream** column.
+Read `.claude/rules/dependency-map.md`. Find the fixed file's **Upstream** column — these are the skills/files that call or depend on this file.
 
-For each upstream dependency:
-- Is the fix consistent with what that file says?
-- Does the upstream file itself need updating to align with the fix?
+For each upstream caller: does this change break any assumption the caller makes? If yes, fix the caller too. Repeat Step 3 for each caller fixed.
 
-Fix any misalignments before continuing.
+### Step 4: Trace Downstream
 
-### Step 4 — Trace Downstream
+Find the fixed file's **Downstream** column — these are the skills/files this file calls or references.
 
-Same row, check the **Downstream** column.
+For each downstream callee: does this change contradict any rule in the callee? If yes, fix the callee too. Repeat Step 4 for each callee fixed.
 
-For each downstream consumer:
-- Does the fix change what that file or agent receives?
-- Does any downstream file need updating to stay consistent?
+### Step 5: Propagate to Template
 
-Fix any misalignments before continuing.
+All `.claude/` changes must be mirrored to `C:/Users/ThomasSjovy/ClaudeCode/coding/project-template-copy-this`.
 
-### Step 5 — Template Propagation
+Copy every modified `.claude/` file to the same relative path in the template repo. `docs/` changes stay project-local — do not propagate them.
 
-Check the **Template?** column for the fixed file.
+### Step 6: Commit Both Repos
 
-**If YES:** Copy the fixed file to `project-template-copy-this/.claude/` at the same relative path. Verify the copy is identical. Commit to the template repo with a clear message describing what was wrong and what was corrected. This step is mandatory — the fix is not complete until it exists in the template.
+Spawn `general-purpose` sub-agent with `git` skill for each repo:
+1. Commit iso-admin-tool changes: message `fix(methodology): [brief description]`
+2. Commit project-template-copy-this changes: same message
 
-**If NO:** Skip.
+Both commits must reference the same discrepancy. Do not commit one without the other.
 
-### Step 6 — Commit
+---
 
-Every methodology fix gets its own commit. Message format:
+## Quick Reference
+
 ```
-fix: [what was wrong and what was corrected]
+Discrepancy found?
+  → Identify precisely → Fix → Trace Upstream → Trace Downstream → Fix inconsistencies → Propagate to template → Commit both repos
 ```
-
-Spawn `git-expert` to commit and push. For `.claude/` fixes: commit the template repo. For `docs/` fixes: commit the project repo.
-
----
-
-## Reference
-
-Dependency map: `.claude/skills/fix-compliance/references/dependency-map.md`
-Template repo: `C:/Users/ThomasSjovy/ClaudeCode/coding/project-template-copy-this`
