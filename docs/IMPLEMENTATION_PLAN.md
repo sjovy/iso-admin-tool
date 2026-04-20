@@ -101,43 +101,32 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 
 ---
 
-### Sprint 2 — Kanban Boards (Core)
+### Sprint 2-Clear — Kanban Board Defect Fixes
 
-**Type:** Feature
-**Goal:** A tenant's ISO modules appear as kanban boards. Tasks can be created, moved between columns, and edited. This is the primary daily-use surface.
-**REQ scope:** REQ-002 (module set), REQ-003 (kanban boards), REQ-005 (RBAC — board visibility)
+**Type:** Clear
+**Goal:** Fix 3 defects found by judge review of Sprint 2. No new features. No additions beyond what the judge flagged.
+**REQ scope:** None — defect resolution only
 
-**Feature list:**
+**Fix list:**
 
-| Item | Complexity | Label |
-|------|------------|-------|
-| Module and Task Prisma schema — both kanban column variants; seed 9 ISO 9001 modules per new tenant | MEDIUM | AFK |
-| Module list page per tenant — shows all 9 modules as cards with PDCA phase label | SIMPLE | AFK |
-| Kanban board page — renders tasks in column layout, standard and extended variants | MEDIUM | AFK |
-| Drag-and-drop column movement (dnd-kit) with optimistic UI update and DB write | COMPLEX | AFK |
-| Task creation — modal with: title, description, owner (user picker), due date, ISO clause reference, priority | MEDIUM | AFK |
-| Task detail panel — view and edit all fields; shows created_at, updated_at | SIMPLE | AFK |
-| Board-level RBAC: Worker sees only their assigned tasks; Management and Admin see all | MEDIUM | AFK |
-| Audit log entries on task create, update, status change | SIMPLE | AFK |
+| # | Score | Fix | File scope |
+|---|-------|-----|------------|
+| 1 | CRITICAL | Refactor `createTask` to use interactive transaction so audit log captures real entity ID (not 'pending') | `src/app/actions/tasks.ts` |
+| 2 | MAJOR | Add Worker role check in `createTask`: reject if `ownerId !== currentUserId` for Worker role | `src/app/actions/tasks.ts` |
+| 3 | MAJOR | Normalize `moveTask` error response: return uniform "not found or forbidden" — do not differentiate permission denied vs. not found | `src/app/actions/tasks.ts` |
 
-**Domain hints:** UI-heavy (drag-and-drop, optimistic updates). Performance-sensitive (board must load < 2s for 200 tasks). RBAC is security-critical — filter at query level, not only in UI.
+**Tracks:** None (single file, sequential)
 
-**Tracks:**
-- Prerequisites: Sprint 1 complete (Supabase, auth, routing working)
-- Track 1 — Schema & API: Module + Task schema, RLS policies, seed script, server actions
-- Track 2 — Board UI: Kanban layout, drag-and-drop, task modal, detail panel (can begin once Track 1 API contract is defined — interfaces first)
-
-**Entry criteria:** Sprint 1 exit criteria met
+**Entry criteria:** Sprint 2 closed
 
 **Exit criteria:**
-- All 9 modules appear on a tenant's dashboard
-- Tasks can be created, edited, and moved between columns
-- Worker user sees only their own tasks; Admin sees all (tested with two accounts)
-- Audit log records all mutations
-- `tsc --noEmit` passes, ESLint passes, vitest passes
+- `createTask` audit log `entityId` equals the created task's real UUID (verified via test)
+- Worker calling `createTask` with `ownerId` ≠ their own user ID receives `FORBIDDEN`
+- `moveTask` returns the same error shape regardless of whether the task is not found or the caller lacks permission
+- `tsc --noEmit` passes, ESLint passes, vitest passes (all 59+ existing tests still pass)
 
-**Quality gates:** `tsc --noEmit`, ESLint, vitest unit tests on board state logic, manual RBAC test
-**Token budget:** ~160K EST
+**Quality gates:** `tsc --noEmit`, ESLint, vitest
+**Token budget:** ~40K EST
 
 ---
 
@@ -361,7 +350,7 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 | Sprint | Name | Type | REQ Scope | Budget EST |
 |--------|------|------|-----------|------------|
 | 1 | Tech Stack Scaffolding | Scaffolding | REQ-001, REQ-010, REQ-013 | ~120K |
-| 2 | Kanban Boards (Core) | Feature | REQ-002, REQ-003, REQ-005 | ~160K |
+| 2-Clear | Kanban Board Defect Fixes | Clear | — | ~40K |
 | 3 | KPI Register | Feature | REQ-002, REQ-008 stub | ~100K |
 | 4 | Quality Gate (S2–S3) — Review | Review | — | ~50K+ |
 | 5 | NCR Module and Traceability | Feature | REQ-007, REQ-008 | ~150K |

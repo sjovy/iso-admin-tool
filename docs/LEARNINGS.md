@@ -44,6 +44,28 @@ Append-only. One entry per completed sprint. Read by the plan sub-agent before e
 - Prisma 7 generated client at `src/generated/prisma/` sets `globalThis['__dirname']` — this is a polyfill for Node.js globals, not the source of the Edge crash (but confirms Node.js code exists in the generated output).
 - `pnpm-workspace.yaml` `ignoredBuiltDependencies` / `onlyBuiltDependencies` has no effect on the Edge runtime crash — red herring, do not revisit.
 
+## Sprint 2 — Kanban Boards (Core) — 2026-04-20
+
+**Tokens:** ~360K actual of ~160K EST (+125% — two parallel tracks; T08 alone was 80K; estimate was per-task, not sprint-total)
+**Over-ran:** T08 Drag-and-Drop (80K vs 140K est — actually under est); overall sprint over budget because parallel track totals were summed, not budgeted as parallel execution
+**Under-ran:** T02 (5K vs 35K — pure type file, trivially small)
+
+**Surprises / failures:**
+- Prisma 7 batch `$transaction([op1, op2])` does not allow the first operation's output to be referenced by the second. `createTask` audit log ends up with `entityId: 'pending'`. Fix requires interactive transaction (`$transaction(async (tx) => { ... })`). This is a Prisma 7 constraint — plan all future audit-log-paired mutations using interactive transactions.
+- `users` table has no `name` field — only `email`. `TaskOwner.name` was set to `email` value. Affects display throughout the board. Future sprint should add `name` to User model or accept email-as-name.
+- Worker RBAC gap on `createTask`: no server-side check that Worker's `ownerId` matches their own user ID. Worker can assign tasks to other users. Easy fix but requires discipline: every mutation server action must enforce role constraints at server level, not just UI.
+- dnd-kit requires `PointerSensor` with `activationConstraint: { distance: 8 }` to avoid accidental drag-on-click. Without this, clicking a card triggers a drag.
+- shadcn Combobox is not a default registry component — it is a Popover+Command pattern that must be assembled manually. Owner picker was downgraded to Select; acceptable for V1.
+- Token budget arithmetic error: per-task estimates (280K T1 + 385K T2) were listed as raw estimates, but the sprint budget of 160K assumed parallel execution. Sprint summary table should show execution budget, not raw task sum.
+
+**Carry forward to planner:**
+- Sprint 2-Clear scope: (1) interactive transaction in `createTask` for real audit `entityId`, (2) Worker `ownerId` validation in `createTask`, (3) uniform error response in `moveTask` (no 403 vs 404 differentiation). File scope: `src/app/actions/tasks.ts` + tests only. ~40K EST.
+- All future mutation server actions: enforce role constraints server-side. Do not rely on UI to restrict inputs (ownerId, status, etc.).
+- Prisma 7 interactive transaction pattern: `prisma.$transaction(async (tx) => { const entity = await tx.model.create(...); await tx.auditLog.create({ data: { entityId: entity.id, ... } }); return entity; })`. Use this whenever audit log needs the created entity's ID.
+- User model lacks `name` field — board displays email as name. Sprint 3+ should add `name` to User (or explicitly decide email-as-name is permanent).
+- Sprint budget should be stated as "active context budget" not "sum of all tasks" — parallel tracks do not multiply cost.
+- After Sprint 2-Clear closes, Verify sprint must be inserted before Sprint 3 proceeds.
+
 <!-- Sprint entries are appended here as sprints complete. -->
 <!-- Format:
 

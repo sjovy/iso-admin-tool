@@ -6,30 +6,32 @@
 
 ## Active Sprint
 
-None. Sprint 1 closed. Awaiting Sprint 2 planning.
+None. Sprint 2 closed. Awaiting Sprint 2-Clear.
 
 ---
 
 ## Last Completed Sprint
 
-**Sprint 1 — Tech Stack Scaffolding** — COMPLETE
-Goal achieved: running skeleton deployed to production. All T01–T09 tasks complete and smoke-tested by Thomas.
+**Sprint 2 — Kanban Boards (Core)** — CLOSED (with judge findings)
+Goal achieved: kanban board surface delivered end-to-end. All T01–T11 tasks complete.
 Key outcomes:
-- Next.js 16.2.4, Supabase Auth, Prisma 7.7, RLS, base routing all wired and deployed
-- Production URL confirmed HTTP 200 (iso-admin-tool.vercel.app)
-- Auth flow confirmed end-to-end: login → dashboard → tenant shell → admin guard → logout guard
-- RLS isolation confirmed: Vitest tests pass (Tenant A cannot read Tenant B data)
+- Module + Task + AuditLog schema migrated; RLS enabled on both tables
+- 9 ISO 9001 modules seeded per tenant (Swedish names, PDCA phases, board variants)
+- Kanban board renders with dnd-kit drag-and-drop; optimistic UI + rollback on failure
+- Task creation modal and task detail panel (inline edit) functional
+- RBAC filtering at query level: Worker sees only own tasks, Management/Admin see all
+- 59 vitest unit tests pass; tsc and ESLint clean
 
-Learnings:
-- Vercel project must have `"framework": "nextjs"` in `vercel.json` — without it, framework is null and routing returns 404
-- Next.js 16 Turbopack + `@supabase/ssr` is incompatible with the Edge runtime (ws → __dirname). Middleware deferred; auth guards implemented in Server Component layouts instead
-- Prisma `cuid()` default is application-level only — Supabase Table Editor cannot auto-generate it; use SQL insert or service role client
+Judge defects — addressed in Sprint 2-Clear:
+- CRITICAL: `createTask` audit log writes `entityId: 'pending'` (batch transaction limitation)
+- MAJOR: Worker can set arbitrary `ownerId` in `createTask` (no server-side role check)
+- MAJOR: `moveTask` leaks task existence via FORBIDDEN vs 404 differentiation
 
 ---
 
 ## Next Pending Sprint
 
-**Sprint 2** — not yet planned.
+**Sprint 2-Clear** — Kanban Board Defect Fixes (not yet planned)
 
 ---
 

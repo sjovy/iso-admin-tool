@@ -66,6 +66,8 @@ This document captures what is in use and what agents must know to work safely. 
 | Migration workflow | Applied via Supabase MCP `apply_migration` (Prisma 7 — `migrate dev` requires direct DB access; MCP used instead) |
 | **Agent constraint** | Schema changes go through Prisma. Never alter Supabase tables directly via SQL console except in emergencies — document any exception. |
 | **Gotcha** | Prisma's connection string must use the Supabase pooled connection URL for serverless (Vercel). Direct URL is for migrations only. Set both `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) in `.env.local`. |
+| **Gotcha** | Prisma 7 `url`/`directUrl` belong in `prisma.config.ts`, NOT in `schema.prisma` datasource block — this is a Prisma 7 breaking change from v6. |
+| **CRITICAL constraint** | Use interactive transactions (`prisma.$transaction(async (tx) => { ... })`) whenever the created entity's ID is needed within the same transaction (e.g. audit log). Batch transactions (`prisma.$transaction([op1, op2])`) do not allow op1's output to flow into op2. |
 
 ---
 
@@ -111,6 +113,23 @@ This document captures what is in use and what agents must know to work safely. 
 | VCS | GitHub |
 | Status | Repo exists and linked to Vercel |
 | Branch model | `main` is production. Feature work on `sprint-N-description` branches. |
+
+---
+
+### Drag-and-Drop
+| Item | Value |
+|------|-------|
+| Library | `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (installed Sprint 2) |
+| Sensor config | `PointerSensor` with `activationConstraint: { distance: 8 }` — prevents accidental drag on click |
+| **Agent constraint** | Always include `activationConstraint` on `PointerSensor`. Omitting it causes drag to fire on every click. |
+
+---
+
+### Toast Notifications
+| Item | Value |
+|------|-------|
+| Library | `sonner` (via `pnpm dlx shadcn@latest add sonner`) |
+| Integration | `<Toaster />` added to `src/app/layout.tsx` once — do not add again in child layouts |
 
 ---
 

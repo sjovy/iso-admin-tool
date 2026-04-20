@@ -17,25 +17,102 @@ enum Role {
   consultant
 }
 
+enum PdcaPhase {
+  PLAN
+  DO
+  CHECK
+  ACT
+}
+
+enum BoardVariant {
+  STANDARD
+  EXTENDED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  users     User[]
+  id         String      @id @default(cuid())
+  name       String
+  slug       String      @unique
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  users      User[]
+  modules    Module[]
+  tasks      Task[]
+  auditLogs  AuditLog[]
 
   @@map("tenants")
 }
 
 model User {
-  id        String   @id  // Must match auth.users.id (UUID from Supabase Auth)
-  email     String   @unique
-  role      Role     @default(worker)
-  tenantId  String   @map("tenant_id")
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id        String     @id  // Must match auth.users.id (UUID from Supabase Auth)
+  email     String     @unique
+  role      Role       @default(worker)
+  tenantId  String     @map("tenant_id")
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  tasks     Task[]     @relation("TaskOwner")
+  auditLogs AuditLog[]
 
   @@map("users")
+}
+
+model Module {
+  id            String       @id @default(uuid())
+  tenantId      String       @map("tenant_id")
+  tenant        Tenant       @relation(fields: [tenantId], references: [id])
+  name          String
+  slug          String
+  pdcaPhase     PdcaPhase    @map("pdca_phase")
+  isoClauseRef  String?      @map("iso_clause_ref")
+  boardVariant  BoardVariant @default(STANDARD) @map("board_variant")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  tasks         Task[]
+
+  @@unique([tenantId, slug])
+  @@map("modules")
+}
+
+model Task {
+  id           String    @id @default(uuid())
+  tenantId     String    @map("tenant_id")
+  tenant       Tenant    @relation(fields: [tenantId], references: [id])
+  moduleId     String    @map("module_id")
+  module       Module    @relation(fields: [moduleId], references: [id])
+  title        String
+  description  String?
+  ownerId      String?   @map("owner_id")
+  owner        User?     @relation("TaskOwner", fields: [ownerId], references: [id])
+  dueDate      DateTime? @map("due_date")
+  isoClauseRef String?   @map("iso_clause_ref")
+  priority     Priority  @default(MEDIUM)
+  status       String
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([moduleId, status])
+  @@map("tasks")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  actorId    String   @map("actor_id")
+  actor      User     @relation(fields: [actorId], references: [id])
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  action     String
+  payload    Json
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
 }
