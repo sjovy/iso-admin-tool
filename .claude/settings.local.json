@@ -1,36 +1,8 @@
 {
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
   "permissions": {
     "allow": [
-      "Bash(git:*)",
-      "Bash(npm:*)",
-      "Bash(npx:*)",
-      "Bash(ls:*)",
-      "Bash(rm:*)",
-      "Write",
-      "Edit",
-      "WebSearch",
-      "Bash(jq --version)",
-      "Bash(python3 -c ':*)",
-      "Bash(supabase projects:*)",
-      "Bash(where supabase:*)",
-      "Read(//c/Users/ThomasSjovy/AppData/Local/**)",
-      "Bash(where vercel:*)",
-      "Bash(scoop --version)",
-      "Bash(winget --version)",
-      "Bash(python3 -m json.tool)",
-      "Read(//c/Users/ThomasSjovy/.claude/**)",
-      "Bash(vercel --version)",
-      "Bash(supabase --version)",
-      "mcp__supabase__list_projects",
-      "Bash(cp \"/c/Users/ThomasSjovy/ClaudeCode/coding/iso-admin-tool/.claude/skills/sprint-next/SKILL.md\" \"/c/Users/ThomasSjovy/ClaudeCode/coding/project-template-copy-this/.claude/skills/sprint-next/SKILL.md\")",
-      "Bash(cp \"/c/Users/ThomasSjovy/ClaudeCode/coding/iso-admin-tool/.claude/skills/sprint-zero/SKILL.md\" \"/c/Users/ThomasSjovy/ClaudeCode/coding/project-template-copy-this/.claude/skills/sprint-zero/SKILL.md\")",
-      "Bash(cp \"/c/Users/ThomasSjovy/ClaudeCode/coding/iso-admin-tool/.claude/skills/sprint-zero/references/planning-docs-structure.md\" \"/c/Users/ThomasSjovy/ClaudeCode/coding/project-template-copy-this/.claude/skills/sprint-zero/references/planning-docs-structure.md\")",
-      "Bash(rm \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\iso-admin-tool\\\\.claude\\\\agents\\\\doc-writer.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\iso-admin-tool\\\\.claude\\\\agents\\\\git-expert.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\iso-admin-tool\\\\.claude\\\\agents\\\\planner.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\iso-admin-tool\\\\.claude\\\\agents\\\\research-analyst.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\iso-admin-tool\\\\.claude\\\\agents\\\\worker.md\")",
-      "Bash(rm \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\project-template-copy-this\\\\.claude\\\\agents\\\\doc-writer.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\project-template-copy-this\\\\.claude\\\\agents\\\\git-expert.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\project-template-copy-this\\\\.claude\\\\agents\\\\planner.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\project-template-copy-this\\\\.claude\\\\agents\\\\research-analyst.md\" \"C:\\\\Users\\\\ThomasSjovy\\\\ClaudeCode\\\\coding\\\\project-template-copy-this\\\\.claude\\\\agents\\\\worker.md\")"
+      "mcp__playwright__browser_navigate",
+      "Bash(grep *)"
     ]
-  },
-  "autoMemoryEnabled": false
+  }
 }
