@@ -27,13 +27,13 @@ Make the correction in the affected file. Do not fix adjacent issues in the same
 
 ### Step 3: Trace Upstream
 
-Read `.claude/rules/dependency-map.md`. Find the fixed file's **Upstream** column — these are the skills/files that call or depend on this file.
+Read `.claude/skills/fix-compliance/references/dependency-map.md`. Find the fixed file's **Upstream** column — these are the skills/files that call or depend on this file.
 
 For each upstream caller: does this change break any assumption the caller makes? If yes, fix the caller too. Repeat Step 3 for each caller fixed.
 
 ### Step 4: Trace Downstream
 
-Find the fixed file's **Downstream** column — these are the skills/files this file calls or references.
+Read `.claude/skills/fix-compliance/references/dependency-map.md`. Find the fixed file's **Downstream** column — these are the skills/files this file calls or references.
 
 For each downstream callee: does this change contradict any rule in the callee? If yes, fix the callee too. Repeat Step 4 for each callee fixed.
 

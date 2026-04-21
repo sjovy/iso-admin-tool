@@ -12,13 +12,13 @@ except:
     pass
 " 2>/dev/null)
 
-if [[ "$file_path" != *".claude/skills/"* && "$file_path" != *".claude/rules/"* ]]; then
+if [[ "$file_path" != *".claude/skills/"* ]]; then
   exit 0
 fi
 
 echo "SKILL MODIFIED: $file_path" >&2
 echo "Fix-compliance required before closing this change:" >&2
-echo "  1. Read .claude/rules/dependency-map.md — find this file's upstream and downstream entries" >&2
+echo "  1. Read .claude/skills/fix-compliance/references/dependency-map.md — find this file's upstream and downstream entries" >&2
 echo "  2. Check upstream callers — does this change break any assumptions in skills that invoke this one?" >&2
 echo "  3. Check downstream callees — does this change contradict rules in skills this one calls?" >&2
 echo "  4. Fix any inconsistencies found" >&2

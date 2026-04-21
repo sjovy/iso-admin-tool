@@ -29,7 +29,7 @@ Maps every `.claude/` skill and script. Use this during fix-compliance Steps 3 a
 | `.claude/skills/quality-gate/references/review-sprint-template.md` | quality-gate Step 3 | Plan sub-agent Mode B for review sprints | Yes |
 | `.claude/skills/sprint-zero/references/planning-docs-structure.md` | sprint-zero, plan | LEARNINGS.md entry format; sprint-next closure; plan output format | Yes |
 | `.claude/skills/plan/references/deep-modules.md` | plan | Plan sub-agent design principles | Yes |
-| `.claude/rules/dependency-map.md` | fix-compliance Steps 3+4 | All .claude/ files | Yes |
+| `.claude/skills/fix-compliance/references/dependency-map.md` | fix-compliance Steps 3+4 | All .claude/ files | Yes |
 | `.claude/scripts/budget-check.sh` | settings.json (PostToolUse hook) | SPRINT_PLAN.md (reads) | Yes |
 | `.claude/scripts/skill-change-guard.sh` | settings.json (PostToolUse hook) | dependency-map.md (references) | Yes |
 | `.claude/scripts/pre-commit-gate.sh` | settings.json (PreToolUse hook) | pnpm lint, tsc | Yes |
