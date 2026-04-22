@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "@playwright/mcp@latest", "--browser", "chromium"]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_SUPABASE_PROJECT_REF"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com",
+      "headers": {
+        "Authorization": "Bearer YOUR_VERCEL_TOKEN"
+      }
+    }
+  }
+}

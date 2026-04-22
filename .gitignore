@@ -1,9 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Claude Code local artifacts — never commit
-.claude/settings.local.json
-.claude/README.md
-.claude/scheduled_tasks.lock
+# Claude Code — never commit
+.claude/
+.mcp.json
 .playwright-mcp/
 
 # dependencies
