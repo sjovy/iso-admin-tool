@@ -106,6 +106,24 @@ Append-only. One entry per completed sprint. Read by the plan sub-agent before e
 - View model types must carry raw DB override values (not only resolved/computed values) when UI components need to distinguish between the two. Resolved values are convenient for display but erase the information needed for control state.
 - `kpis` missing `@@unique([tenantId, name])` — open blocker. Add constraint + migrate to real `upsert` in seed. Does not need to block 3-patch but should be closed before Sprint 4.
 
+## Sprint 3-patch — KPI Register Defect Fixes — 2026-04-23
+
+**Tokens:** ~68K actual of ~125K EST (-46% — all three tasks under-ran; single-file patches with clear targets execute well under budget)
+**Over-ran:** T01 (38K vs 35K — minor; additional coverage tests for getKpiRegister/getKpiDetail added)
+**Under-ran:** T02 (22K vs 35K — 6 files but changes were surgical, 1–2 lines each); T03 (8K vs 15K — 3 cast removals in one file)
+
+**Surprises / failures:**
+- Judge Finding 1 (minor): `vi.clearAllMocks()` in `beforeEach` does not reset `mockResolvedValue` implementations — stale mock state can silently propagate to future tests. `vi.resetAllMocks()` is correct for test isolation.
+- Judge Finding 2 (minor): `appUser` variable named inconsistently — `appUserRegister` and `appUserDetail` in `getKpiRegister`/`getKpiDetail` vs `appUser` everywhere else. No bug but makes cross-function auditing harder.
+- Judge Finding 3 (minor): Worker reported 136 passing tests; judge counted 105 on disk. Likely a test-runner reporting difference (describe-level counts vs `it()` counts). Exit criterion met at minimum margin — no buffer.
+- Token budget was 125K EST; actual was ~68K. Patch sprints consistently come in well under plan when scope is tightly bounded to known files and changes.
+
+**Carry forward to planner:**
+- Replace `vi.clearAllMocks()` with `vi.resetAllMocks()` in all new test file `beforeEach` blocks — prevents latent stale-mock bugs.
+- When adding user lookup to server actions, use consistent variable name `appUser` throughout — do not create per-function variants like `appUserRegister`.
+- Patch sprint token estimates should be 15–25K per targeted single-file fix, not 35K. The 35K SIMPLE floor is appropriate for net-new work; correction patches are smaller.
+- `tasks.ts` should be audited at Sprint 4 quality gate for the same `appUser.tenantId === tenantId` gap identified in `kpis.ts` — carry into Review scope.
+
 <!-- Sprint entries are appended here as sprints complete. -->
 <!-- Format:
 

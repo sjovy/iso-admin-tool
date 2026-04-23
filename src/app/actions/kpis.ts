@@ -34,8 +34,8 @@ type KpiWithMeasurements = {
   description: string | null
   unit: string
   target: number
-  isoCategory: string
-  ragOverride: string | null
+  isoCategory: IsoCategory
+  ragOverride: RagStatus | null
   linkedCorrectiveActionId: string | null
   measurements: Array<{
     id: string
@@ -68,7 +68,7 @@ function mapKpiToRow(kpi: KpiWithMeasurements): KpiRow {
   }
 
   const ragStatus: RagStatus =
-    (kpi.ragOverride as RagStatus | null) ?? computeRag(kpi.target, latestActual)
+    kpi.ragOverride ?? computeRag(kpi.target, latestActual)
 
   return {
     id: kpi.id,
@@ -76,8 +76,9 @@ function mapKpiToRow(kpi: KpiWithMeasurements): KpiRow {
     description: kpi.description,
     unit: kpi.unit,
     target: kpi.target,
-    isoCategory: kpi.isoCategory as IsoCategory,
+    isoCategory: kpi.isoCategory,
     ragStatus,
+    ragOverride: kpi.ragOverride,
     latestActual,
     trendDirection,
     linkedCorrectiveActionId: kpi.linkedCorrectiveActionId,
@@ -130,11 +131,15 @@ export async function createKpi(
 
   const appUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { role: true, tenantId: true },
   })
 
   if (!appUser) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
   }
 
   if (appUser.role === 'worker') {
@@ -200,6 +205,19 @@ export async function addMeasurement(
   const tenantId = await resolveTenant(tenantSlug)
   if (!tenantId) {
     return { success: false, error: { code: 'NOT_FOUND', message: `Tenant '${tenantSlug}' not found` } }
+  }
+
+  const appUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { tenantId: true },
+  })
+
+  if (!appUser) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
   }
 
   // Verify parent KPI belongs to this tenant
@@ -272,11 +290,15 @@ export async function setRagOverride(
 
   const appUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { role: true, tenantId: true },
   })
 
   if (!appUser) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
   }
 
   if (appUser.role === 'worker') {
@@ -344,6 +366,19 @@ export async function getKpiRegister(
     return { success: false, error: { code: 'NOT_FOUND', message: `Tenant '${tenantSlug}' not found` } }
   }
 
+  const appUserRegister = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { tenantId: true },
+  })
+
+  if (!appUserRegister) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUserRegister.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
+  }
+
   try {
     const kpis = await prisma.kpi.findMany({
       where: { tenantId },
@@ -385,6 +420,19 @@ export async function getKpiDetail(
   const tenantId = await resolveTenant(tenantSlug)
   if (!tenantId) {
     return { success: false, error: { code: 'NOT_FOUND', message: `Tenant '${tenantSlug}' not found` } }
+  }
+
+  const appUserDetail = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { tenantId: true },
+  })
+
+  if (!appUserDetail) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUserDetail.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
   }
 
   try {

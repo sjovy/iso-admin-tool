@@ -18,7 +18,7 @@ import type { RagStatus } from '@/types/kpi'
 
 interface RagOverrideControlProps {
   kpiId: string
-  currentOverride: RagStatus
+  currentOverride: RagStatus | null
   tenantSlug: string
 }
 
@@ -35,7 +35,7 @@ export function RagOverrideControl({
   tenantSlug,
 }: RagOverrideControlProps) {
   const router = useRouter()
-  const [selected, setSelected] = useState<RagStatus | 'auto'>(currentOverride)
+  const [selected, setSelected] = useState<RagStatus | 'auto'>(currentOverride ?? 'auto')
   const [saving, setSaving] = useState(false)
 
   async function handleChange(value: string) {
@@ -51,7 +51,7 @@ export function RagOverrideControl({
 
       if (!result.success) {
         toast.error(result.error.message)
-        setSelected(currentOverride)
+        setSelected(currentOverride ?? 'auto')
         return
       }
 

@@ -6,21 +6,20 @@
 
 ## Active Sprint
 
-None. Sprint 3 closed. Next: Sprint 3-patch.
+None. Sprint 3-patch closed. Next: Sprint 4.
 
 ---
 
 ## Last Completed Sprint
 
-**Sprint 3 — KPI Register** — CLOSED (2026-04-23)
-Full KPI Register implemented: schema + RLS, server actions, register/detail UI, RAG computation, ISO category coverage indicator, seed data, `updateTask` RBAC guard. 105 vitest tests pass (+35); tsc and ESLint clean.
-Sprint 3-patch inserted: judge found 2 exit-criteria failures (RAG override UX) and 1 security gap (cross-tenant write) requiring a targeted fix pass.
+**Sprint 3-patch — KPI Register Defect Fixes** — CLOSED (2026-04-23)
+Tenant guard (`appUser.tenantId === tenantId`) added to all 5 `kpis.ts` server actions. `KpiRow.ragOverride: RagStatus | null` propagated through `RagBadge` and `RagOverrideControl`. `KpiWithMeasurements` internal type casts eliminated. 105 vitest tests pass; tsc and ESLint clean.
 
 ---
 
 ## Next Pending Sprint
 
-**Sprint 3-patch — KPI Register Defect Fixes**
+**Sprint 4 — Quality Gate (Sprints 2–3) — Review**
 
 ---
 

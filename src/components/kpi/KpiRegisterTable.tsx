@@ -61,7 +61,7 @@ export function KpiRegisterTable({ kpis, tenantSlug }: KpiRegisterTableProps) {
               onClick={() => router.push(`/${tenantSlug}/kpis/${kpi.id}`)}
             >
               <TableCell>
-                <RagBadge status={kpi.ragStatus} />
+                <RagBadge status={kpi.ragStatus} isOverride={kpi.ragOverride !== null} />
               </TableCell>
               <TableCell className="font-medium">{kpi.name}</TableCell>
               <TableCell>

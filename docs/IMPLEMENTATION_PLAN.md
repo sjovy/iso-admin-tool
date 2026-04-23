@@ -101,35 +101,6 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 
 ---
 
-### Sprint 3-patch — KPI Register Defect Fixes
-
-**Type:** Feature (patch — correction sprint from Sprint 3 judge findings)
-**Goal:** Fix security and exit-criteria failures identified by the Sprint 3 judge. Scope is limited to the three findings below — no additions.
-**REQ scope:** REQ-002 (same as Sprint 3)
-
-**Fix scope:**
-
-| Fix | Source finding | Files |
-|-----|---------------|-------|
-| Add `appUser.tenantId === tenantId` guard to all 5 functions in `kpis.ts` | Finding 5 (security) | `src/app/actions/kpis.ts` |
-| Add `ragOverride: RagStatus \| null` to `KpiRow`; propagate to register + detail pages; fix `RagBadge` `isOverride` prop; fix `RagOverrideControl` init | Findings 2+3 (exit criteria) | `src/types/kpi.ts`, `src/app/actions/kpis.ts`, `src/components/kpi/RagBadge.tsx`, `src/components/kpi/RagOverrideControl.tsx`, `src/components/kpi/KpiDetailClient.tsx`, `src/components/kpi/KpiRegisterTable.tsx` |
-| Fix `KpiWithMeasurements` internal type: `isoCategory: IsoCategory`, `ragOverride: RagStatus \| null` (eliminates `as` casts) | Finding 8 (minor, same file area — bundle) | `src/app/actions/kpis.ts` |
-
-**Tracks:** None (single file set)
-
-**Entry criteria:** Sprint 3 closed
-
-**Exit criteria:**
-- `appUser.tenantId === tenantId` check present and tested in all `kpis.ts` functions
-- `KpiRow.ragOverride` field present; `RagBadge` tooltip correctly shows "(manuellt)" vs "(beräknad)"; `RagOverrideControl` shows "Auto" when no override is set
-- No `as IsoCategory` or `as RagStatus` casts in `mapKpiToRow`
-- `tsc --noEmit`, ESLint, vitest pass (test count ≥ 105)
-
-**Quality gates:** `tsc --noEmit`, ESLint, vitest
-**Token budget:** ~40K EST
-
----
-
 ### Sprint 4 — Quality Gate (Sprints 2–3) — Review
 
 **Type:** Review
@@ -313,7 +284,6 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 | Sprint | Name | Type | REQ Scope | Budget EST |
 |--------|------|------|-----------|------------|
 | 1 | Tech Stack Scaffolding | Scaffolding | REQ-001, REQ-010, REQ-013 | ~120K |
-| 3-patch | KPI Register Defect Fixes | Patch | REQ-002 | ~40K |
 | 4 | Quality Gate (S2–S3) — Review | Review | — | ~50K+ |
 | 5 | NCR Module and Traceability | Feature | REQ-007, REQ-008 | ~150K |
 | 6 | Document Linking and Storage Adapter | Feature | REQ-006, REQ-014 | ~100K |

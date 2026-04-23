@@ -28,7 +28,7 @@ export function KpiDetailClient({ kpi, tenantSlug, userRole }: KpiDetailClientPr
         {canOverride && (
           <RagOverrideControl
             kpiId={kpi.id}
-            currentOverride={kpi.ragStatus}
+            currentOverride={kpi.ragOverride}
             tenantSlug={tenantSlug}
           />
         )}

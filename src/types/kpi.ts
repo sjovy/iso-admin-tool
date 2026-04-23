@@ -29,6 +29,7 @@ export interface KpiRow {
   target: number
   isoCategory: IsoCategory
   ragStatus: RagStatus      // computed or override — resolved server-side
+  ragOverride: RagStatus | null  // raw DB override value; null = no manual override
   latestActual: number | null
   trendDirection: 'up' | 'down' | 'flat' | null
   linkedCorrectiveActionId: string | null
