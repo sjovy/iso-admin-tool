@@ -8,6 +8,7 @@ import { PrismaClient } from '../src/generated/prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 import { seedModulesForTenant } from './seed/modules'
+import { seedKpisForTenant } from './seed/kpis'
 
 // Load .env.local for local runs
 config({ path: '.env.local' })
@@ -36,6 +37,7 @@ async function main() {
     for (const tenant of tenants) {
       console.log(`Seeding modules for tenant: ${tenant.slug} (${tenant.id})`)
       await seedModulesForTenant(prisma, tenant.id)
+      await seedKpisForTenant(prisma, tenant.id)
     }
 
     console.log('Seed complete')

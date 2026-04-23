@@ -84,6 +84,15 @@ This document captures what is in use and what agents must know to work safely. 
 
 ---
 
+### Server Action Isolation Pattern
+
+| Item | Value |
+|------|-------|
+| Mandatory tenant check | After `getUser()` and `resolveTenant()`, every server action must assert `appUser.tenantId === tenantId`. RLS enforces DB-level isolation but the application layer must also verify the authenticated user belongs to the resolved tenant. |
+| **CRITICAL constraint** | Missing this check allows any authenticated user who knows a resource UUID to read or write data in a different tenant by supplying an arbitrary `tenantSlug`. Found in Sprint 3 judge review — apply retroactively to all server actions. |
+
+---
+
 ### Row-Level Security (RLS)
 | Item | Value |
 |------|-------|

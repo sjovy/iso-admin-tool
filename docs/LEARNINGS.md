@@ -84,6 +84,28 @@ Append-only. One entry per completed sprint. Read by the plan sub-agent before e
 - Unowned task / Worker move gap: decide if Workers should be blocked from creating unowned tasks, or if `moveTask` should allow Workers to move unowned tasks. Document the decision.
 - Token estimates for Clear sprints targeting a single file should be ~15–25K, not 40K. The budget ceiling of 40K is fine as a safety net but the estimate should be tighter.
 
+## Sprint 3 — KPI Register — 2026-04-23
+
+**Tokens:** ~130K actual of ~135K EST (-4% — well within budget; single-track sequential execution)
+**Over-ran:** None
+**Under-ran:** T02 (6K vs 35K — pure type file; same pattern as Sprint 2 T02)
+
+**Surprises / failures:**
+- Judge (MAJOR/security): Cross-tenant write vulnerability — `kpis.ts` server actions verify the KPI's `tenantId` but never check that the authenticated user belongs to that tenant. Any authenticated user who knows a KPI's UUID can write measurements to a different tenant's KPI. Fix: assert `appUser.tenantId === tenantId` after user lookup in every function.
+- Judge (MAJOR): `KpiRow` type carries only the resolved `ragStatus`; there is no `ragOverride: RagStatus | null` field. `RagBadge.isOverride` prop is never passed by any caller → tooltip always shows "(beräknad)" even when a manual override is active. Exit criterion unmet.
+- Judge (MAJOR): `RagOverrideControl` initialises from the *resolved* `ragStatus`, not the raw `ragOverride`. When no override is set, the control displays the computed status rather than "Auto" — misleading UX. Same root cause as Finding 2: `KpiRow` must carry the raw override, not just the resolved value.
+- Judge (minor): `computeRag` plan note (T03) said "not exported"; T07 note said "pure exported function" — plan self-contradicted. Exporting is correct; plan note was stale.
+- Judge (minor): Worker can set `ownerId: null` on tasks they do not own (T08 guard only checks non-null ownerId reassignment). Policy unresolved — logged as open blocker.
+- Judge (minor): Internal `KpiWithMeasurements` type uses `string` for enum fields, requiring `as IsoCategory` casts in `mapKpiToRow`. Type-safe fix bundled into Sprint 3-patch.
+- `getKpiRegister` fetches only last 2 measurements per KPI (not full history) — correct and efficient for list view; `getKpiDetail` fetches full history. No issue.
+- Sprint budget of 135K was a PMO target; raw task sum was 420K. Active context budget (sequential execution) came in at ~130K, validating the PMO estimate.
+
+**Carry forward to planner:**
+- Sprint 3-patch scope: (1) `appUser.tenantId === tenantId` check in all 5 `kpis.ts` functions with tests; (2) `ragOverride: RagStatus | null` added to `KpiRow`, propagated to both pages, `RagBadge` and `RagOverrideControl` fixed; (3) internal type casts eliminated. File scope: `src/types/kpi.ts`, `src/app/actions/kpis.ts`, `src/components/kpi/` (3 files). ~40K EST.
+- Every multi-tenant server action must verify `appUser.tenantId === resolvedTenantId` immediately after user lookup. This is the correct isolation pattern. `tasks.ts` should be audited for the same gap at Sprint 4 quality gate.
+- View model types must carry raw DB override values (not only resolved/computed values) when UI components need to distinguish between the two. Resolved values are convenient for display but erase the information needed for control state.
+- `kpis` missing `@@unique([tenantId, name])` — open blocker. Add constraint + migrate to real `upsert` in seed. Does not need to block 3-patch but should be closed before Sprint 4.
+
 <!-- Sprint entries are appended here as sprints complete. -->
 <!-- Format:
 

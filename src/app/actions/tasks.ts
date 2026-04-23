@@ -283,6 +283,28 @@ export async function updateTask(
     return { success: false, error: { code: 'NOT_FOUND', message: `Task '${input.taskId}' not found` } }
   }
 
+  // RBAC: Worker may not reassign ownerId to another user
+  const appUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  })
+
+  if (!appUser) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (
+    appUser.role === 'worker' &&
+    input.ownerId !== undefined &&
+    input.ownerId !== null &&
+    input.ownerId !== user.id
+  ) {
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'Workers cannot reassign tasks to other users' },
+    }
+  }
+
   // Build partial update — only fields present in input
   const updateData: Record<string, unknown> = {}
   const changedFields: string[] = []

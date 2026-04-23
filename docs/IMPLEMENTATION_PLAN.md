@@ -101,41 +101,32 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 
 ---
 
-### Sprint 3 — KPI Register
+### Sprint 3-patch — KPI Register Defect Fixes
 
-**Type:** Feature
-**Goal:** Each tenant has a KPI register with structured entries, RAG status, and measurement logging. Covers ISO Clause 9.1 mandated measurement categories.
-**REQ scope:** REQ-002 (Mäta & Utvärdera module), REQ-008 (traceability foundation — KPI → Corrective Action link stub)
+**Type:** Feature (patch — correction sprint from Sprint 3 judge findings)
+**Goal:** Fix security and exit-criteria failures identified by the Sprint 3 judge. Scope is limited to the three findings below — no additions.
+**REQ scope:** REQ-002 (same as Sprint 3)
 
-**Feature list:**
+**Fix scope:**
 
-| Item | Complexity | Label |
-|------|------------|-------|
-| KPI and KPIMeasurement Prisma schema | MEDIUM | AFK |
-| KPI register page — list view with RAG status badges, target vs actual, trend arrow | MEDIUM | AFK |
-| KPI detail page — full fields, measurement history log | SIMPLE | AFK |
-| Add measurement modal — record actual value, date, notes | SIMPLE | AFK |
-| RAG status computed automatically from target vs actual; manual override allowed | SIMPLE | AFK |
-| ISO 9001 Clause 9.1 category tags on each KPI (conformity / customer satisfaction / QMS performance / risk / supplier / improvement) — coverage indicator on register page | MEDIUM | AFK |
-| Stub traceability field on KPI: "linked corrective action ID" (populated in Sprint 5) | SIMPLE | AFK |
-| Seed 10 sample KPIs from analysis doc for new tenants | SIMPLE | AFK |
-| Add Worker RBAC guard to `updateTask` — Worker cannot update `ownerId` to another user's ID (parity with `createTask` guard; judge finding from Sprint 2-Clear) | SIMPLE | AFK |
+| Fix | Source finding | Files |
+|-----|---------------|-------|
+| Add `appUser.tenantId === tenantId` guard to all 5 functions in `kpis.ts` | Finding 5 (security) | `src/app/actions/kpis.ts` |
+| Add `ragOverride: RagStatus \| null` to `KpiRow`; propagate to register + detail pages; fix `RagBadge` `isOverride` prop; fix `RagOverrideControl` init | Findings 2+3 (exit criteria) | `src/types/kpi.ts`, `src/app/actions/kpis.ts`, `src/components/kpi/RagBadge.tsx`, `src/components/kpi/RagOverrideControl.tsx`, `src/components/kpi/KpiDetailClient.tsx`, `src/components/kpi/KpiRegisterTable.tsx` |
+| Fix `KpiWithMeasurements` internal type: `isoCategory: IsoCategory`, `ragOverride: RagStatus \| null` (eliminates `as` casts) | Finding 8 (minor, same file area — bundle) | `src/app/actions/kpis.ts` |
 
-**Domain hints:** Data-integrity-sensitive (RAG logic, measurement history immutability). UI-moderate (list and detail, no drag-and-drop). Coverage indicator is a key compliance-evidence feature.
+**Tracks:** None (single file set)
 
-**Tracks:** None (single-track — moderate scope, no disjoint file sets)
-
-**Entry criteria:** Sprint 2 exit criteria met
+**Entry criteria:** Sprint 3 closed
 
 **Exit criteria:**
-- KPI register accessible from tenant dashboard
-- Measurements can be added; history is immutable (append-only)
-- RAG status displays correctly and auto-updates on new measurement
-- Coverage indicator shows which ISO 9.1 categories have at least one KPI
-- `tsc --noEmit`, ESLint, vitest pass
+- `appUser.tenantId === tenantId` check present and tested in all `kpis.ts` functions
+- `KpiRow.ragOverride` field present; `RagBadge` tooltip correctly shows "(manuellt)" vs "(beräknad)"; `RagOverrideControl` shows "Auto" when no override is set
+- No `as IsoCategory` or `as RagStatus` casts in `mapKpiToRow`
+- `tsc --noEmit`, ESLint, vitest pass (test count ≥ 105)
 
-**Quality gates:** `tsc --noEmit`, ESLint, vitest on RAG computation logic
-**Token budget:** ~135K EST
+**Quality gates:** `tsc --noEmit`, ESLint, vitest
+**Token budget:** ~40K EST
 
 ---
 
@@ -322,7 +313,7 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 | Sprint | Name | Type | REQ Scope | Budget EST |
 |--------|------|------|-----------|------------|
 | 1 | Tech Stack Scaffolding | Scaffolding | REQ-001, REQ-010, REQ-013 | ~120K |
-| 3 | KPI Register | Feature | REQ-002, REQ-008 stub | ~135K |
+| 3-patch | KPI Register Defect Fixes | Patch | REQ-002 | ~40K |
 | 4 | Quality Gate (S2–S3) — Review | Review | — | ~50K+ |
 | 5 | NCR Module and Traceability | Feature | REQ-007, REQ-008 | ~150K |
 | 6 | Document Linking and Storage Adapter | Feature | REQ-006, REQ-014 | ~100K |
