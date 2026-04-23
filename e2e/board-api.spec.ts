@@ -136,7 +136,7 @@ describe('Board type contracts — compile-time validation', () => {
   })
 
   it('buildTaskFilter returns correct shape for all role types', async () => {
-    const { buildTaskFilter } = await import('@/app/actions/board')
+    const { buildTaskFilter } = await import('@/lib/utils/actions')
 
     const workerFilter = buildTaskFilter('user-1', 'worker', 'module-1')
     expect(workerFilter).toHaveProperty('ownerId', 'user-1')

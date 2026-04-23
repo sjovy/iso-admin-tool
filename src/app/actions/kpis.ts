@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db/prisma'
+import { computeRag } from '@/lib/utils/actions'
 import type {
   KpiRow,
   KpiDetail,
@@ -25,21 +26,6 @@ async function resolveTenant(tenantSlug: string): Promise<string | null> {
     select: { id: true },
   })
   return tenant?.id ?? null
-}
-
-/**
- * Compute RAG status from target and latest actual measurement.
- * Pure function — no DB calls.
- * - null actual    → AMBER (no data)
- * - actual ≥ target → GREEN
- * - actual ≥ target * 0.8 → AMBER
- * - actual < target * 0.8 → RED
- */
-export function computeRag(target: number, actual: number | null): RagStatus {
-  if (actual === null) return 'AMBER'
-  if (actual >= target) return 'GREEN'
-  if (actual >= target * 0.8) return 'AMBER'
-  return 'RED'
 }
 
 type KpiWithMeasurements = {

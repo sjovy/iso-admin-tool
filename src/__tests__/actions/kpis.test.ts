@@ -51,7 +51,8 @@ vi.mock('@/lib/db/prisma', () => ({
 }))
 
 // Import AFTER mocks
-import { createKpi, addMeasurement, setRagOverride, computeRag } from '@/app/actions/kpis'
+import { createKpi, addMeasurement, setRagOverride } from '@/app/actions/kpis'
+import { computeRag } from '@/lib/utils/actions'
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
 

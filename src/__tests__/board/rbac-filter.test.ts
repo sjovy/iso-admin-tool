@@ -2,7 +2,7 @@
 // Pure function tests — no DB calls, no network.
 
 import { describe, it, expect } from 'vitest'
-import { buildTaskFilter } from '@/app/actions/board'
+import { buildTaskFilter } from '@/lib/utils/actions'
 
 const TEST_USER_ID = 'user-abc-123'
 const TEST_MODULE_ID = 'module-xyz-456'

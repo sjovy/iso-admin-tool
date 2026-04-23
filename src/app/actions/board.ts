@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/db/prisma'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { buildTaskFilter } from '@/lib/utils/actions'
 import type {
   ModuleCard,
   BoardData,
@@ -46,24 +47,6 @@ const EXTENDED_COLUMNS: Array<{ status: TaskStatus; label: string }> = [
 
 function getColumnDefs(variant: BoardVariant): Array<{ status: TaskStatus; label: string }> {
   return variant === 'EXTENDED' ? EXTENDED_COLUMNS : STANDARD_COLUMNS
-}
-
-// Pure function — extract RBAC filter for unit testing (T04 requirement)
-export function buildTaskFilter(
-  userId: string,
-  role: string,
-  moduleId: string
-): Record<string, unknown> {
-  if (role === 'worker') {
-    return {
-      moduleId,
-      ownerId: userId,
-    }
-  }
-  // management, company_admin, consultant (consultant uses service role so RLS is bypassed)
-  return {
-    moduleId,
-  }
 }
 
 // Resolve tenantSlug → tenantId

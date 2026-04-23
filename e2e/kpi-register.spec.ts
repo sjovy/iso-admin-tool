@@ -75,9 +75,13 @@ describe('KPI Register — server action file exists', () => {
 // ─── Server action exports ────────────────────────────────────────────────────
 
 describe('KPI Register — server action exports', () => {
-  it('computeRag, createKpi, addMeasurement, setRagOverride, getKpiRegister, getKpiDetail are exported', async () => {
+  it('computeRag is exported from utils/actions', async () => {
+    const utils = await import('@/lib/utils/actions')
+    expect(typeof utils.computeRag).toBe('function')
+  })
+
+  it('createKpi, addMeasurement, setRagOverride, getKpiRegister, getKpiDetail are exported', async () => {
     const actions = await import('@/app/actions/kpis')
-    expect(typeof actions.computeRag).toBe('function')
     expect(typeof actions.createKpi).toBe('function')
     expect(typeof actions.addMeasurement).toBe('function')
     expect(typeof actions.setRagOverride).toBe('function')
