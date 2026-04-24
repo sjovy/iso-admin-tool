@@ -7,7 +7,7 @@
 ## Active Sprint
 
 **Sprint 4 — Quality Gate (Sprints 2–3) — Review** — IN PROGRESS (started 2026-04-24)
-Session 1 closed. tsc/ESLint/vitest (136 tests)/build all PASS. Smoke test blocked by Supabase pooler connectivity issue — hotfix applied (`prisma.ts` strips `?pgbouncer=true`), not yet verified. Area 5 code review complete (F-01/F-02 security findings, F-03/F-04 deferred). Manual session not yet started.
+Session 2 closed. All automated gates PASS. F-05/F-06 hotfixes verified. 14 findings logged (F-01–F-14). Area 1 and Area 5 complete. Area 2 partial (window confusion polluted admin scenarios). Areas 3, 4, 6–11 not yet tested. Clear sprint next — fix F-01, F-02, F-08, F-09, F-14, F-10 — then resume Review with one-account-at-a-time approach.
 
 ---
 
