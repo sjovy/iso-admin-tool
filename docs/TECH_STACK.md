@@ -68,6 +68,7 @@ This document captures what is in use and what agents must know to work safely. 
 | **Gotcha** | Prisma's connection string must use the Supabase pooled connection URL for serverless (Vercel). Direct URL is for migrations only. Set both `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) in `.env.local`. |
 | **Gotcha** | Prisma 7 `url`/`directUrl` belong in `prisma.config.ts`, NOT in `schema.prisma` datasource block — this is a Prisma 7 breaking change from v6. |
 | **CRITICAL constraint** | Use interactive transactions (`prisma.$transaction(async (tx) => { ... })`) whenever the created entity's ID is needed within the same transaction (e.g. audit log). Batch transactions (`prisma.$transaction([op1, op2])`) do not allow op1's output to flow into op2. |
+| **CRITICAL constraint** | When using Prisma 7 with `@prisma/adapter-pg` (driver adapter), do NOT pass `?pgbouncer=true` in the connection string to `PrismaPg`. That flag is a Prisma 4/5 built-in-pool hint; the `pg` driver receives it as a raw startup parameter and PgBouncer rejects the session. Strip it before passing to the adapter: `url.searchParams.delete('pgbouncer')`. |
 
 ---
 

@@ -16,11 +16,16 @@ declare global {
 }
 
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL
-  if (!connectionString) {
+  const raw = process.env.DATABASE_URL
+  if (!raw) {
     throw new Error('DATABASE_URL is not set')
   }
-  // ssl: rejectUnauthorized false required for Supabase pooler in some environments
+  // Strip ?pgbouncer=true — this is a Prisma 4/5 built-in-pool hint and is not
+  // understood by the pg driver adapter; passing it causes PgBouncer to reject the
+  // startup handshake with ENOTFOUND / "tenant/user not found".
+  const url = new URL(raw)
+  url.searchParams.delete('pgbouncer')
+  const connectionString = url.toString()
   const adapter = new PrismaPg({ connectionString, ssl: { rejectUnauthorized: false } })
   return new PrismaClient({ adapter })
 }
