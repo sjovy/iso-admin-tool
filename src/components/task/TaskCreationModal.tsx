@@ -90,7 +90,7 @@ export function TaskCreationModal({
       moduleId,
       title: title.trim(),
       description: description.trim() || undefined,
-      ownerId: ownerId || undefined,
+      ownerId: (ownerId && ownerId !== '__none__') ? ownerId : undefined,
       dueDate: dueDate || undefined,
       isoClauseRef: isoClauseRef.trim() || undefined,
       priority,
@@ -181,7 +181,7 @@ export function TaskCreationModal({
                 <SelectValue placeholder="Välj ansvarig (valfritt)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Ingen ansvarig</SelectItem>
+                <SelectItem value="__none__">Ingen ansvarig</SelectItem>
                 {boardUsers.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.email}

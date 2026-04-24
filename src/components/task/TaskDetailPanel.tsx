@@ -74,7 +74,7 @@ export function TaskDetailPanel({
   // so useState initializers run fresh for each task (no useEffect needed).
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
-  const [ownerId, setOwnerId] = useState<string>(task?.owner?.id ?? '')
+  const [ownerId, setOwnerId] = useState<string>(task?.owner?.id ?? '__none__')
   const [dueDate, setDueDate] = useState(task?.dueDate ? task.dueDate.slice(0, 10) : '')
   const [isoClauseRef, setIsoClauseRef] = useState(task?.isoClauseRef ?? '')
   const [priority, setPriority] = useState<Priority>(task?.priority ?? 'MEDIUM')
@@ -174,14 +174,14 @@ export function TaskDetailPanel({
               value={ownerId}
               onValueChange={(v) => {
                 setOwnerId(v)
-                void saveField({ ownerId: v || null })
+                void saveField({ ownerId: (v && v !== '__none__') ? v : null })
               }}
             >
               <SelectTrigger id={`${labelId}-owner`}>
                 <SelectValue placeholder="Välj ansvarig" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Ingen ansvarig</SelectItem>
+                <SelectItem value="__none__">Ingen ansvarig</SelectItem>
                 {boardUsers.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.email}

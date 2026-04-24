@@ -39,7 +39,7 @@
 | ESLint | `npx eslint src --max-warnings 0` | Zero warnings or errors | PASS |
 | Vitest | `npx vitest run` | All tests pass | PASS |
 | Build | `pnpm build` | Zero errors | PASS |
-| Smoke test | Run smoke-test skill | All scenarios pass | FAIL |
+| Smoke test | Run smoke-test skill | All scenarios pass | PASS |
 
 ---
 
@@ -48,7 +48,7 @@
 > Updated at every session start and at every planned interruption. This block is the resumption anchor — keep it accurate.
 
 **Last updated:** 2026-04-24
-**Session status:** Session 1 closed. Automated gates PASS (tsc/ESLint/vitest/build). Smoke test BLOCKED — Supabase pooler connectivity issue; hotfix applied to prisma.ts, not yet verified. Area 5 code review COMPLETE. Manual session (Areas 2–11) not yet started.
+**Session status:** Session 2 closed. All automated gates PASS. F-05 and F-06 hotfixes verified. Area 1 COMPLETE. Area 5 COMPLETE. Area 2 partial (14 findings logged, window confusion polluted results for admin scenarios). Areas 3, 4, 6–11 not yet tested. Proceeding to Clear sprint before resuming Review. Next Review session: test Worker scenarios first, then Admin separately — do NOT run both accounts simultaneously.
 
 | Account | Device | Role in Test | Notes |
 |---------|--------|--------------|-------|
@@ -64,17 +64,13 @@
 
 ## Manual Test Script
 
-> **RESUME FROM: Area 1 — smoke test blocker**
-> Resolve DB connectivity before starting manual session:
-> 1. Start `pnpm dev` fresh (kill any existing server first)
-> 2. Navigate to `http://localhost:3000/acme-corp/modules/planera` in browser
-> 3. If 500 error persists: update `DATABASE_URL` in `.env.local` to use direct connection (`db.oyasarzogtwuuqevmwmg.supabase.co:5432`) and retry
-> 4. Once board loads: re-run smoke tests via smoke-test skill → confirm all 5 pass → update Area 1 to COMPLETE → begin Area 2
+> **RESUME FROM: Area 2 — re-run from 2.01 after Clear sprint**
+> Clear sprint fixes F-01, F-02, F-08, F-09, F-14, F-10 first. Then resume Review with Worker-only session first, Admin-only second. Do NOT run both accounts simultaneously.
 > _(Update this marker at every planned interruption. Remove when sprint closes.)_
 
 ---
 
-### Area 1 — Automated Exit Criteria 🔄 IN PROGRESS
+### Area 1 — Automated Exit Criteria ✓ COMPLETE
 
 Run exit criteria checks via the exit-criteria sub-agent. Results recorded in the Exit Criteria Checks table above. No manual scenarios here — proceed to Area 2 once all checks are green.
 
@@ -235,6 +231,14 @@ Run exit criteria checks via the exit-criteria sub-agent. Results recorded in th
 | F-03 | 5 | defer | `deleteTask` not implemented. Not exported from `tasks.ts` or any other source file. Scenarios 2.07, 2.08, 2.12, 4.04 cannot be tested. Sprint 2 LEARNINGS mention create/move/update only — delete not in Sprint 2 scope. | Missing feature — never built | Implement `deleteTask` with RBAC, tenant guard, audit log. Add to Sprint 5 scope (not Clear — missing feature, not regression). Mark affected scenarios SKIPPED. |
 | F-04 | 11 | defer | `kpis` Prisma model missing `@@unique([tenantId, name])`. Only `@@index([tenantId])` present. Duplicate KPI names per tenant are possible. Pre-existing open blocker carried from Sprint 3. | Schema omission from Sprint 3 | Add `@@unique([tenantId, name])`; migrate; update seed to use `upsert`. Add to Sprint 5 scope. |
 | F-05 | 1 | fix | `HOTFIX APPLIED` — `DATABASE_URL` contains `?pgbouncer=true` passed raw to `PrismaPg`. This is a Prisma 4/5 built-in-pool hint; the `pg` driver adapter sends it as a PostgreSQL startup parameter which PgBouncer rejects. Board page returned 500 `DriverAdapterError: (ENOTFOUND) tenant/user not found` on every Prisma query — blocked smoke test and entire manual session. | `?pgbouncer=true` in DATABASE_URL incompatible with Prisma 7 driver adapter | Strip `pgbouncer` param in `createPrismaClient()` via `url.searchParams.delete('pgbouncer')` before passing to `PrismaPg`. Fixed inline — `src/lib/db/prisma.ts`. |
+| F-09 | 2 | fix | Worker edited title/description on a task they do not own — `updateTask` has no ownership check. Guard at line 296–306 only prevents ownerId reassignment; it does not assert `task.ownerId === user.id` before allowing edits. Worker can freely edit any task's title, description, priority, etc. | Missing ownership guard in `updateTask` for Worker role | Add guard after appUser fetch: if `appUser.role === 'worker'` and `task.ownerId !== user.id`, return FORBIDDEN. Needs task ownership fetch (currently only `tenantId` is selected). Update integration tests. |
+| F-08 | 2 | fix | Worker created a task with admin account as owner — RBAC guard did not reject. Guard at `createTask` line 108: `appUser.role === 'worker' && input.ownerId && input.ownerId !== user.id`. Guard exists in code but did not fire. Likely cause: test Worker account has a role other than `'worker'` in the DB, OR the ownerId submitted was falsy despite selection. Investigate in Clear: query `users` table for Worker account role; add integration test covering this path. | Worker role not `'worker'` in DB, or ownerId not reaching the guard | Verify test Worker DB role. If role is wrong: fix seed/test data. If guard is bypassed by code path: fix guard. Add integration test for createTask Worker ownerId restriction. |
+| F-14 | 2 | fix | Task cards become unclickable after owner is set to null (Ingen ansvarig). Detail panel no longer opens. Likely null-owner crash in TaskDetailPanel render or click handler lost on re-render after board state update with owner=null. | Null owner not handled in task card click/render path | Investigate TaskDetailPanel and SortableTaskCard render with null owner. Ensure click handler survives owner=null state update. |
+| F-13 | 2 | note | DB roles are correctly set up (Worker = `worker`, Admin = `company_admin`, both in `acme-corp` tenant). Window confusion throughout session caused incorrect FAIL assessments. No UI indicator to identify current user/role (see F-10). 2.11 Admin test was performed in the Worker window — result invalid. Re-test 2.11 in confirmed Admin window. | No user identity indicator in UI (F-10) — windows look identical | F-10 fix (add user identity to UI) resolves this class of confusion. |
+| F-12 | 2 | note | Admin board window does not update in real time when changes are made — requires manual refresh. Worker window reflects own changes immediately (optimistic UI). Likely inconsistent optimistic update wiring between sessions, or Admin path missing optimistic state update. No functional impact — data is correct after refresh. | Optimistic update state not applied in Admin session path | Investigate whether `onTaskCreated` / board state update is wired correctly for Admin role. Defer — cosmetic/UX. |
+| F-11 | 2 | note | Hydration mismatch on `SortableTaskCard`: dnd-kit generates `aria-describedby="DndDescribedBy-N"` — SSR and client produce different counter values. React logs console error on page load. No functional impact. | dnd-kit ID counter not stable across SSR/client | Wrap `KanbanBoard` in `dynamic(() => import(...), { ssr: false })` to skip SSR for dnd-kit tree, or suppress hydration on the element. Defer — cosmetic. |
+| F-07 | 2 | note | Task detail panel slides out from the right side. Expected: centered modal. Cosmetic/UX — no functional impact. | UI design decision not reviewed | Defer to dedicated UX sprint or version run. |
+| F-06 | 2 | fix | `HOTFIX APPLIED` — `TaskCreationModal` and `TaskDetailPanel` both render `<SelectItem value="">Ingen ansvarig</SelectItem>`. Radix UI forbids empty string values on SelectItem — throws runtime error on modal open, blocking all task creation and editing. | `value=""` on SelectItem violates Radix UI constraint | Change sentinel to `"__none__"` on both SelectItems; update handlers to treat `"__none__"` as null/undefined. Fixed inline — `TaskCreationModal.tsx` and `TaskDetailPanel.tsx`. |
 
 ---
 
@@ -249,8 +253,12 @@ Run exit criteria checks via the exit-criteria sub-agent. Results recorded in th
 |---|------------|-------------|------------|-----|
 | 01 | F-01 | Add `appUser.tenantId === tenantId` guard to `createTask`, `moveTask`, `updateTask` in `tasks.ts`; add `tenantId: true` to all appUser selects; update tests | MEDIUM | 70K |
 | 02 | F-02 | Add `appUser.tenantId === tenantId` guard to `getBoardData`, `getModuleList`, `getBoardUsers` in `board.ts`; add `tenantId: true` to all appUser selects; update tests | SIMPLE | 35K |
+| 03 | F-08 | Investigate Worker RBAC bypass on createTask: query DB for Worker account role; fix root cause (seed data or code guard); add integration test | SIMPLE | 20K |
+| 04 | F-09 | Add ownership check to `updateTask`: fetch `ownerId` alongside `tenantId`; assert `task.ownerId === user.id` for Worker role before allowing edits; update integration tests | SIMPLE | 20K |
+| 05 | F-10 | Add user identity indicator to UI (email or role badge in nav/header) so sessions can be distinguished | SIMPLE | 15K |
+| 06 | F-14 | Fix null-owner task cards becoming unclickable — investigate render/click handler path for tasks with owner=null | SIMPLE | 15K |
 
-**Running total:** ~105K of 180K ceiling
+**Running total:** ~175K of 180K ceiling
 
 ### Deferred
 
