@@ -132,6 +132,8 @@ This document captures what is in use and what agents must know to work safely. 
 | Library | `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (installed Sprint 2) |
 | Sensor config | `PointerSensor` with `activationConstraint: { distance: 8 }` — prevents accidental drag on click |
 | **Agent constraint** | Always include `activationConstraint` on `PointerSensor`. Omitting it causes drag to fire on every click. |
+| **CRITICAL constraint** | Multi-container kanban (tasks moving between columns) requires BOTH: (1) `onDragOver` handler on `DndContext` that calls `setColumns` to transfer the task mid-drag — without this, `over.id` is null or stale at `onDragEnd`; (2) `useDroppable` on each column body so empty columns register as valid drop targets. `SortableContext` alone is not sufficient. |
+| **CRITICAL constraint** | When `onDragOver` mutates column state mid-drag, `handleDragEnd` reads a stale closure of `columns`. Track the drag-start source column via `useRef` (set in `onDragStart`, read in `onDragEnd`) to avoid stale-closure bugs. |
 
 ---
 

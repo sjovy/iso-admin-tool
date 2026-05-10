@@ -141,6 +141,26 @@ Append-only. One entry per completed sprint. Read by the plan sub-agent before e
 - The correct Supabase pooler URL for this project: `postgresql://postgres.oyasarzogtwuuqevmwmg:[PASSWORD]@aws-1-eu-north-1.pooler.supabase.com:6543/postgres` (transaction, IPv4). Session pooler uses port 5432 on the same host.
 - Sprint 4 Review resumes from Area 2 (2.01 onward), one account at a time: Worker first, Admin separately. 14 findings already logged (F-01–F-14); F-01, F-02, F-05, F-06, F-08, F-09, F-10, F-14 resolved; F-03, F-04, F-07, F-11, F-12, F-13 unresolved status unknown — check findings log at resume.
 
+## Sprint 4 — Quality Gate (Sprints 2–3) — Review — 2026-05-10
+
+**Tokens:** ~50K EST (actual not tracked precisely — multi-session)
+**Over-ran:** None
+**Under-ran:** None
+
+**Surprises / failures:**
+- Brave browser incognito windows share the same session — opening a second incognito window does NOT create a separate auth session. Use a different browser (Firefox) or a Brave profile window for the second account in future sessions.
+- dnd-kit multi-container drag-and-drop (KanbanBoard) is fundamentally broken — missing `onDragOver` handler and `useDroppable` on columns. This was not caught in Sprint 2 testing. Root cause: Sprint 2 review tested single-column state only; cross-column drag was not manually validated.
+- KPI coverage indicator counts categories with KPIs (not measurements). Test plan for Area 8 had incorrect expected outcomes based on a misunderstanding. No code change needed — test plan expectations were wrong.
+- `audit_logs` table has RLS disabled. Low risk in current architecture (Prisma bypasses RLS) but should be enabled as security hardening in a future sprint.
+- Brave browser "1 Issue" overlay (dnd-kit hydration mismatch F-11) is cosmetic — does not affect functionality. Confirmed deferred.
+- No UI for creating KPIs — `createKpi` server action exists but is not wired to any button. Test data was seeded via Supabase MCP `execute_sql` to unblock Areas 6–9.
+
+**Carry forward to planner:**
+- **dnd-kit multi-container pattern:** Always add `onDragOver` + `useDroppable` on column bodies when building a kanban board. `SortableContext` alone is insufficient for cross-container drops. Track drag-start source via `useRef` to avoid stale closure in `handleDragEnd`.
+- **Two-account testing:** Never rely on incognito windows of the same browser for separate sessions. Firefox + Brave (non-incognito) is a reliable combination.
+- **KPI create UI** is missing — deferred to Sprint 5. Any sprint that tests KPI CRUD must either seed data via MCP or build the create UI first.
+- Sprint 4-Clear-2 (F-15 drag-and-drop fix) is next. After that: Sprint 4-Verify, then Sprint 5.
+
 <!-- Sprint entries are appended here as sprints complete. -->
 <!-- Format:
 

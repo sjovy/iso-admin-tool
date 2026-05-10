@@ -5,7 +5,7 @@
 **REQ scope:** None — validation only
 **Validates:** Sprint 2 (kanban boards), Sprint 3 (KPI register)
 **Token Budget:** ~50K EST
-**Status:** IN PROGRESS — 2026-04-24
+**Status:** CLOSED — 2026-05-10
 
 > When manual testing begins, update Status to `IN PROGRESS` and add session date below.
 > When resuming, add the RESUME FROM marker directly above the Manual Test Script section.

@@ -6,28 +6,28 @@
 
 ## Active Sprint
 
-**Sprint 4 — Quality Gate (Sprints 2–3) — Review** — IN PROGRESS (resumed 2026-05-10)
-14 findings logged (F-01–F-14). Area 1 and Area 5 complete. Area 2 partial — resume from 2.01 using one-account-at-a-time approach (Worker first, then Admin). Areas 3, 4, 6–11 not yet tested. F-01, F-02, F-05, F-06, F-08, F-09, F-10, F-14 resolved.
+**Sprint 4-Clear-2 — Quality Gate (Sprints 2–3) — Clear Pass 2** — PENDING
+One finding: F-15 (drag-and-drop broken — missing `onDragOver` + `useDroppable`). Two component files to update (`KanbanBoard.tsx`, `KanbanColumn.tsx`). Budget: 60K.
 
 ---
 
 ## Last Completed Sprint
 
-**Sprint 4-Clear — Quality Gate Clear (Sprint 4 Review Findings)** — CLOSED (2026-05-10)
-All 6 tasks complete: cross-tenant guards in tasks.ts and board.ts, Worker RBAC bypass fix, Worker ownership check in updateTask, user identity indicator in nav, null-owner card clickable. 151 vitest tests pass; tsc, ESLint, build, and all 5 smoke tests clean. DATABASE_URL updated to Supabase transaction pooler (aws-1-eu-north-1, port 6543) — resolves persistent IPv6-only DNS blocker on direct connection.
+**Sprint 4 — Quality Gate (Sprints 2–3) — Review** — CLOSED (2026-05-10)
+All 11 areas complete. 15 findings total (F-01–F-15). F-01–F-02, F-05–F-06, F-08–F-10, F-14 resolved in Sprint 4-Clear. F-15 (drag-and-drop) is the only new fix-level finding — addressed in Clear-2. F-03, F-04 deferred to Sprint 5. F-07, F-11–F-13 noted (cosmetic).
 
 ---
 
 ## Previously Completed Sprint
 
-**Sprint 3-patch — KPI Register Defect Fixes** — CLOSED (2026-04-23)
-Tenant guard (`appUser.tenantId === tenantId`) added to all 5 `kpis.ts` server actions. `KpiRow.ragOverride: RagStatus | null` propagated through `RagBadge` and `RagOverrideControl`. `KpiWithMeasurements` internal type casts eliminated. 105 vitest tests pass; tsc and ESLint clean.
+**Sprint 4-Clear — Quality Gate Clear (Sprint 4 Review Findings)** — CLOSED (2026-05-10)
+All 6 tasks complete: cross-tenant guards in tasks.ts and board.ts, Worker RBAC bypass fix, Worker ownership check in updateTask, user identity indicator in nav, null-owner card clickable. 151 vitest tests pass; tsc, ESLint, build, and all 5 smoke tests clean.
 
 ---
 
 ## Next Pending Sprint
 
-**Sprint 5 — NCR Module and Traceability** (after Sprint 4 closes)
+**Sprint 4-Verify — Quality Gate (Sprints 2–3) — Verify** (after Clear-2 closes)
 
 ---
 
