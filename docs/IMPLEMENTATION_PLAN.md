@@ -114,6 +114,28 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 
 ---
 
+### Sprint 4-Clear — Quality Gate Clear (Sprint 4 Review Findings)
+
+**Type:** Clear
+**Goal:** Eliminate all fix-severity findings from Sprint 4 Review before resuming the Review session
+**REQ scope:** None — defect fixes only
+**Scope:** F-01, F-02, F-08, F-09, F-10, F-14
+
+| Task | Finding | Complexity | EST |
+|------|---------|------------|-----|
+| T01 — Cross-tenant guard: tasks.ts | F-01 | MEDIUM | 70K |
+| T02 — Cross-tenant guard: board.ts | F-02 | SIMPLE | 35K |
+| T03 — Worker RBAC bypass: createTask | F-08 | SIMPLE | 20K |
+| T04 — Worker ownership check: updateTask | F-09 | SIMPLE | 20K |
+| T05 — User identity indicator | F-10 | SIMPLE | 15K |
+| T06 — Null-owner task cards | F-14 | SIMPLE | 15K |
+
+**Token budget:** 175K of 180K ceiling
+**Entry criteria:** Sprint 4 Review session 2 closed; F-05 and F-06 hotfixes verified; automated gates passing
+**Exit criteria:** All 6 tasks complete; tsc, ESLint, Vitest, pnpm build, smoke-test all pass
+
+---
+
 ### Sprint 5 — NCR Module and Traceability
 
 **Type:** Feature
@@ -285,6 +307,7 @@ Multi-standard expansion (ISO 14001, 27001, 45001), mobile-optimized views, and 
 |--------|------|------|-----------|------------|
 | 1 | Tech Stack Scaffolding | Scaffolding | REQ-001, REQ-010, REQ-013 | ~120K |
 | 4 | Quality Gate (S2–S3) — Review | Review | — | ~50K+ |
+| 4-Clear | Quality Gate Clear (S4 Findings) | Clear | — | ~175K |
 | 5 | NCR Module and Traceability | Feature | REQ-007, REQ-008 | ~150K |
 | 6 | Document Linking and Storage Adapter | Feature | REQ-006, REQ-014 | ~100K |
 | 7 | Quality Gate (S5–S6) — Review | Review | — | ~50K+ |
