@@ -5,7 +5,7 @@
 **REQ scope:** None — defect fixes only
 **Scope:** Review findings F-01, F-02, F-08, F-09, F-10, F-14 only
 **Token Budget:** 175K of 180K ceiling
-**Status:** PENDING
+**Status:** CLOSED
 
 > Scope boundary: Fix only what Review found. No new features. No backlog items.
 
@@ -34,11 +34,11 @@
 
 | Check | Command | Pass Condition | Result |
 |-------|---------|----------------|--------|
-| TypeScript | `npx tsc --noEmit` | Zero errors | |
-| ESLint | `npx eslint src --max-warnings 0` | Zero warnings or errors | |
-| Vitest | `npx vitest run` | All tests pass | |
-| Build | `pnpm build` | Zero errors | |
-| Smoke test | Run smoke-test skill | All scenarios pass | |
+| TypeScript | `npx tsc --noEmit` | Zero errors | PASS |
+| ESLint | `npx eslint src --max-warnings 0` | Zero warnings or errors | PASS |
+| Vitest | `npx vitest run` | All tests pass | PASS — 151 tests (2026-05-10) |
+| Build | `pnpm build` | Zero errors | PASS |
+| Smoke test | Run smoke-test skill | All scenarios pass | PASS — all 5 scenarios (2026-05-10) |
 
 ---
 
@@ -213,9 +213,16 @@ Ceiling: 180K. Buffer: 5K.
 
 ## Actuals
 
-_To be filled at sprint close._
+**Closed:** 2026-05-10
 
 ### Tasks completed
+All 6 tasks (T01–T06) completed in prior session (commit 7f0c864).
+
 ### Tests added
+10 new integration tests across tasks.ts and board.ts (cross-tenant guards, Worker RBAC, Worker ownership). Total test count: 141 → 151.
+
 ### Actual tokens used
+~175K (at ceiling).
+
 ### Carry-forward to Verify sprint
+None — all findings resolved. DATABASE_URL in .env.local updated to Supabase transaction pooler (`aws-1-eu-north-1.pooler.supabase.com:6543`) — direct IPv6-only connection was blocking smoke test.

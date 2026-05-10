@@ -124,6 +124,23 @@ Append-only. One entry per completed sprint. Read by the plan sub-agent before e
 - Patch sprint token estimates should be 15–25K per targeted single-file fix, not 35K. The 35K SIMPLE floor is appropriate for net-new work; correction patches are smaller.
 - `tasks.ts` should be audited at Sprint 4 quality gate for the same `appUser.tenantId === tenantId` gap identified in `kpis.ts` — carry into Review scope.
 
+## Sprint 4-Clear — Quality Gate Clear (Sprint 4 Review Findings) — 2026-05-10
+
+**Tokens:** ~175K actual of 175K EST (at ceiling; matched budget)
+**Over-ran:** None
+**Under-ran:** None
+
+**Surprises / failures:**
+- Supabase direct connection (`db.[ref].supabase.co:5432`) resolves to IPv6 only — unreachable from dev machine. This blocked the smoke test across two sessions. The Supabase MCP uses the REST/Management API (HTTPS/443), which is IPv4 and unaffected. `execute_sql` via MCP works while Prisma's TCP connection to port 5432 silently fails.
+- First pooler attempt used `aws-0-eu-north-1` — wrong subdomain. Correct subdomain is `aws-1-eu-north-1`. PgBouncer error was "tenant/user not found" (confusingly similar to the `?pgbouncer=true` error from Sprint 4 session 1).
+- Prisma connection fix required two .env.local changes across two restarts before the correct region was confirmed.
+
+**Carry forward to planner:**
+- **DATABASE_URL is now the transaction pooler** (`aws-1-eu-north-1.pooler.supabase.com:6543`). Do not revert to direct connection — the `db.*` hostname is IPv6-only on this machine.
+- **Smoke test requires a live DB connection.** Vitest passes even when DB is unreachable (all tests mock Prisma). Do not treat Vitest-pass as a proxy for DB connectivity.
+- The correct Supabase pooler URL for this project: `postgresql://postgres.oyasarzogtwuuqevmwmg:[PASSWORD]@aws-1-eu-north-1.pooler.supabase.com:6543/postgres` (transaction, IPv4). Session pooler uses port 5432 on the same host.
+- Sprint 4 Review resumes from Area 2 (2.01 onward), one account at a time: Worker first, Admin separately. 14 findings already logged (F-01–F-14); F-01, F-02, F-05, F-06, F-08, F-09, F-10, F-14 resolved; F-03, F-04, F-07, F-11, F-12, F-13 unresolved status unknown — check findings log at resume.
+
 <!-- Sprint entries are appended here as sprints complete. -->
 <!-- Format:
 
