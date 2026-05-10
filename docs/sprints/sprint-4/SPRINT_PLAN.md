@@ -47,16 +47,18 @@
 
 > Updated at every session start and at every planned interruption. This block is the resumption anchor — keep it accurate.
 
-**Last updated:** 2026-04-24
-**Session status:** Session 2 closed. All automated gates PASS. F-05 and F-06 hotfixes verified. Area 1 COMPLETE. Area 5 COMPLETE. Area 2 partial (14 findings logged, window confusion polluted results for admin scenarios). Areas 3, 4, 6–11 not yet tested. Proceeding to Clear sprint before resuming Review. Next Review session: test Worker scenarios first, then Admin separately — do NOT run both accounts simultaneously.
+**Last updated:** 2026-05-10
+**Session status:** Sprint 4-Clear CLOSED (2026-05-10). All Clear tasks verified. All automated gates PASS (151 tests, tsc, ESLint, build, 5 smoke scenarios). F-01, F-02, F-05, F-06, F-08, F-09, F-10, F-14 resolved. Area 1 COMPLETE. Area 5 COMPLETE. Area 2 re-run required from 2.01 — previous results polluted by window confusion. Areas 3, 4, 6–11 not yet tested. **Next action: resume Area 2 with Worker-only pass first, Admin-only second.**
+
+**Infrastructure note:** DATABASE_URL is now the Supabase transaction pooler (`aws-1-eu-north-1.pooler.supabase.com:6543`). Direct connection (`db.*.supabase.co:5432`) is IPv6-only and unreachable. Dev server must be running (`pnpm dev`) before Playwright tests.
 
 | Account | Device | Role in Test | Notes |
 |---------|--------|--------------|-------|
-| Account A | Browser | Worker | test-worker@acme.test / qwerty |
-| Account B | Browser | company_admin | test-admin@acme-corp.test / TestAdmin123! — created via MCP |
-| Account C | Browser | Non-member | Recommended — confirm 403 behavior |
+| Account A | Browser tab 1 | Worker | test-worker@acme.test / qwerty |
+| Account B | Browser tab 2 (separate session) | company_admin | test-admin@acme-corp.test / TestAdmin123! |
+| Account C | — | Non-member | Not yet created — skip 2.14 or create on demand |
 
-**Test data state:** No test data created yet. Seed tasks and KPIs before beginning Area 2.
+**Test data state:** No test data created yet. Create at least one task via Worker account (2.02) before testing edit/delete scenarios.
 **Note on Area 5:** PMO code review complete — findings recorded. Area 5 DONE.
 **Note on scenarios 2.07, 2.08, 2.12, 4.04:** `deleteTask` not implemented — mark SKIPPED during manual session.
 
@@ -64,8 +66,14 @@
 
 ## Manual Test Script
 
-> **RESUME FROM: Area 2 — re-run from 2.01 after Clear sprint**
-> Clear sprint fixes F-01, F-02, F-08, F-09, F-14, F-10 first. Then resume Review with Worker-only session first, Admin-only second. Do NOT run both accounts simultaneously.
+> **RESUME FROM: Area 2 — scenario 2.01 (Worker pass)**
+> Sprint 4-Clear is CLOSED. All fixes verified. Start here:
+> 1. Confirm dev server is running (`pnpm dev` on port 3000).
+> 2. Log in as Worker (`test-worker@acme.test / qwerty`) in one browser tab.
+> 3. Run scenarios 2.01 → 2.08 with Worker only. Skip 2.07 and 2.08 (`deleteTask` not implemented — mark SKIPPED).
+> 4. Then log in as Admin (`test-admin@acme-corp.test / TestAdmin123!`) in a separate browser tab/session.
+> 5. Run scenarios 2.09 → 2.13 with Admin only.
+> 6. After Area 2 complete: continue Areas 3, 4, 6, 7, 8, 9, 10, 11 in order.
 > _(Update this marker at every planned interruption. Remove when sprint closes.)_
 
 ---
