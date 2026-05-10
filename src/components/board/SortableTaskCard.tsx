@@ -41,7 +41,7 @@ export function SortableTaskCard({
       {...attributes}
       {...listeners}
     >
-      <TaskCard task={task} onClick={disabled ? undefined : onClick} isDragging={isDragging} />
+      <TaskCard task={task} onClick={onClick} isDragging={isDragging} />
     </div>
   )
 }

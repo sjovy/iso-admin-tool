@@ -95,7 +95,7 @@ export function TaskDetailPanel({
       // Rollback local state to task values
       setTitle(task.title)
       setDescription(task.description ?? '')
-      setOwnerId(task.owner?.id ?? '')
+      setOwnerId(task.owner?.id ?? '__none__')
       setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : '')
       setIsoClauseRef(task.isoClauseRef ?? '')
       setPriority(task.priority)

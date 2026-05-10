@@ -98,14 +98,21 @@ export async function createTask(
   // RBAC: Worker may only create tasks assigned to themselves
   const appUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { role: true, tenantId: true },
   })
 
   if (!appUser) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
   }
 
-  if (appUser.role === 'worker' && input.ownerId && input.ownerId !== user.id) {
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
+  }
+
+  // Normalize empty string ownerId to null — prevents falsy bypass of the guard below
+  const effectiveOwnerId = input.ownerId || null
+
+  if (appUser.role === 'worker' && effectiveOwnerId !== null && effectiveOwnerId !== user.id) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'Workers may only create tasks assigned to themselves' } }
   }
 
@@ -121,7 +128,7 @@ export async function createTask(
           moduleId: input.moduleId,
           title: input.title,
           description: input.description ?? null,
-          ownerId: input.ownerId ?? null,
+          ownerId: effectiveOwnerId,
           dueDate,
           isoClauseRef: input.isoClauseRef ?? null,
           priority: input.priority,
@@ -192,11 +199,15 @@ export async function moveTask(
   // RBAC: Worker may only move their own tasks
   const appUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { role: true, tenantId: true },
   })
 
   if (!appUser) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
   }
 
   if (appUser.role === 'worker' && task.ownerId !== user.id) {
@@ -276,7 +287,7 @@ export async function updateTask(
 
   const task = await prisma.task.findUnique({
     where: { id: input.taskId },
-    select: { tenantId: true },
+    select: { tenantId: true, ownerId: true },
   })
 
   if (!task || task.tenantId !== tenantId) {
@@ -286,11 +297,19 @@ export async function updateTask(
   // RBAC: Worker may not reassign ownerId to another user
   const appUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { role: true, tenantId: true },
   })
 
   if (!appUser) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
+  }
+
+  if (appUser.role === 'worker' && task.ownerId !== user.id) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Workers may only edit tasks they own' } }
   }
 
   if (

@@ -108,6 +108,19 @@ export async function getModuleList(
     return { success: false, error: { code: 'NOT_FOUND', message: `Tenant '${tenantSlug}' not found` } }
   }
 
+  const appUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true, tenantId: true },
+  })
+
+  if (!appUser) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
+  }
+
   const modules = await prisma.module.findMany({
     where: { tenantId },
     include: {
@@ -167,11 +180,15 @@ export async function getBoardData(
   // Resolve caller's role from app users table
   const appUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { role: true, tenantId: true },
   })
 
   if (!appUser) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
   }
 
   const role = appUser.role
@@ -320,6 +337,19 @@ export async function getBoardUsers(tenantSlug: string): Promise<ActionResult<Ta
   const tenantId = await resolveTenant(tenantSlug)
   if (!tenantId) {
     return { success: false, error: { code: 'NOT_FOUND', message: `Tenant '${tenantSlug}' not found` } }
+  }
+
+  const appUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true, tenantId: true },
+  })
+
+  if (!appUser) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'User not in app users table' } }
+  }
+
+  if (appUser.tenantId !== tenantId) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } }
   }
 
   const users = await prisma.user.findMany({
